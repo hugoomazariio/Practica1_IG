@@ -38,7 +38,7 @@ bool DoTheImportThing(const std::string& pFile);
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v7.vert", "../shaders_P1/shader.v7.frag")) 
+	if (!IGlib::init("../shaders_P1/shader.v9.vert", "../shaders_P1/shader.v9.frag")) 
 		return -1;
 	
 	
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 										  // Al pasarlo a c++ mat4 no está incluido, tengo que poner glm::mat4 defino la matriz 4x4
 
 	// Ahora posiciono la cámara en el eje z -3 y luego voy a invertir su dirección
-	view[3].z = -3; // Esto es un acceso de la matriz, es una forma de acceder a la matriz, columna 4 fila 4 (el array empieza en 0)
+	view[3].z = -6; // Esto es un acceso de la matriz, es una forma de acceder a la matriz, columna 4 fila 4 (el array empieza en 0)
 
 	// Con esto tendría suficiente para una matriz de vista, ahora hago una matriz de proyección
 	glm::mat4 proj = glm::mat4(1.0);
@@ -193,19 +193,22 @@ bool DoTheImportThing(const std::string& pFile) {
 
 		float* vertexArray; 
 		unsigned int vertexIndex = 0;
+
 		float* normalArray;
 		unsigned int normalIndex = 0;
+
 		float* textCoordsArray;
 
-		if (mesh->HasFaces()) {//por defecto siempre tiene, pero no está de más chequear
+		// Para rellenar los triángulos
+		if (mesh->HasFaces()) { //por defecto siempre tiene, pero no está de más chequear
 				for (unsigned int t = 0; t < mesh->mNumFaces; ++t) {
 					const aiFace* face = &mesh->mFaces[t];
 					memcpy(&faceArray[faceIndex], face->mIndices, 3 *
-						sizeof(unsigned int));
+						sizeof(unsigned int)); // Copio los bytes que me hacen falta
 					faceIndex += 3;
 				}
 		}
-		/*
+		
 		if (mesh->HasPositions()) { //Idem: por defecto siempre tiene.
 			vertexArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
 
@@ -217,11 +220,23 @@ bool DoTheImportThing(const std::string& pFile) {
 				vertexIndex += 3; // Strife (avance de 3)
 			}
 		}
-		*/
-		objId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray, textCoordsArray);
-		glm::mat4 modelMat = glm::scale(glm::mat4(1.0), glm::vec3(0.2));
-		IGlib::setModelMat(objId, modelMat);
+
+		if (mesh->HasNormals()) {
+			normalArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
+			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+				const aiVector3D* a_normal = &mesh->mNormals[k];
+				memcpy(&normalArray[normalIndex], &float(a_normal->x), sizeof(float));
+				memcpy(&normalArray[normalIndex + 1], &float(a_normal->y), sizeof(float));
+				memcpy(&normalArray[normalIndex + 2], &float(a_normal->z), sizeof(float));
+				normalIndex += 3;
+			}
+		}
+
+		objId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
+		glm::mat4 modelMat2 = glm::scale(glm::mat4(1.0), glm::vec3(0.2)); 
+		IGlib::setModelMat(objId, modelMat2);
 		IGlib::addColorTex(objId, "../3D_assets/Alien-Animal-Base-Diffuse.jpg");
+		
 	}
 
 	return true;
