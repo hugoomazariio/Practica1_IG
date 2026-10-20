@@ -8,7 +8,6 @@
 #define M_PI 3.14159265
 
 // Assimp library
-
 #include <assimp/Importer.hpp>  // Esto sirve para la importación de ficheros
 #include <assimp/scene.h> // Estructura de la escena
 #include <assimp/postprocess.h> // Flags de procesado
@@ -21,6 +20,16 @@ int objId = -1;
 // Variables assimp
 const aiScene* sc; 
 
+//Variables para movimiento de la cámara
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Posición de la cámara en el espacio
+glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cámara
+glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); //Vector hacia arriba (eje Y positivo)
+
+float ang = -90.0f; //Ángulo inicial de la cámara. Comenzamos en -90 para que la cámara comience mirando hacia delante 
+
+glm::vec3 frontCam;
+glm::vec3 rightCam;
+glm::vec3 upCam;
 
 //Declaraci�n de CB
 void resizeFunc(int width, int height);
@@ -30,6 +39,9 @@ void mouseFunc(int button, int state, int x, int y);
 void mouseMoveFunc(int x, int y);
 void mousePassMoveFunc(int x, int y);
 void mouseWheelFunc(int wheel, int dir, int x, int y);
+
+void updateCameraVectors(); //Para actualizar los vectores de la cámara según la entrada del teclado
+glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up); //Para crear una matriz lookAt
 
 // Carga de objetos
 bool DoTheImportThing(const std::string& pFile);
@@ -41,39 +53,30 @@ int main(int argc, char** argv)
 	if (!IGlib::init("../shaders_P1/shader.v9.vert", "../shaders_P1/shader.v9.frag")) 
 		return -1;
 	
-	
-	
-	//Se ajusta la c�mara
-	//Si no se da valor se cojen valores por defecto
-	
-	//model_view matrix
-	glm::mat4 view = glm::mat4(1.0); // Inicializo la matriz como matriz identidad
-										  // Al pasarlo a c++ mat4 no está incluido, tengo que poner glm::mat4 defino la matriz 4x4
 
-	// Ahora posiciono la cámara en el eje z -3 y luego voy a invertir su dirección
-	view[3].z = -6; // Esto es un acceso de la matriz, es una forma de acceder a la matriz, columna 4 fila 4 (el array empieza en 0)
-
-	// Con esto tendría suficiente para una matriz de vista, ahora hago una matriz de proyección
+	//Matriz de proyección
 	glm::mat4 proj = glm::mat4(1.0);
 
-	// Construyo f, near y far
-	float f = 1.0 / tan(M_PI / 6.0);
-	float far = 10.0; // Plano lejano
-	float near = 0.1; // Plano cercano
+	float f = 1.0f / tan(M_PI / 6.0); // Pi entre 6 para convertir a radianes
+	float far = 20.0; //Lo definimos nosotros
+	float near = 0.1; //Lo definimos nosotros
 
-	// Cojo elemento a elemento de la matriz de proyección y voy a ir tocandolos uno a uno
-
-	proj[0].x = f; // Primera columna del elemento de la matriz
-	proj[1].y = f; // El uno a uno de la diagonal de la matriz
+	proj[0].x = f; //elemento 0, 0
+	proj[1].y = f;
 	proj[2].z = (far + near) / (near - far);
 	proj[2].w = -1.0;
 	proj[3].z = (2.0 * far * near) / (near - far);
 	proj[3].w = 0.0;
 
+	IGlib::setProjMat(proj);
 
-	
-	IGlib::setProjMat(proj); 
-	IGlib::setViewMat(view);
+
+	//Movimiento de la cámara (definimos 3 vectores perpendiculares, cada uno para cada eje)
+	frontCam = glm::normalize(targetPos - cameraPos); // Vector desde la posición de la cámara hasta la posición a la que apunta (Eje z)
+	rightCam = glm::normalize(glm::cross(frontCam, upVector)); //Vector hacia la derecha (eje X)
+	upCam = glm::normalize(glm::cross(rightCam, frontCam)); //Vector hacia arriba (eje Y)
+
+	updateCameraVectors();
 	
 	if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
 		return -1;
@@ -109,7 +112,24 @@ int main(int argc, char** argv)
 
 void resizeFunc(int width, int height)
 {
-	//Ajusta el aspect ratio al tama�o de la venta
+	//AJUSTAR EL ASPECT RATIO MEDIANTE MATRIZ DE PROYECCIÓN
+	// Replicamos la matriz de proyección con la variable aspectRatio
+
+		glm::mat4 proj = glm::mat4(1.0); //Matriz de proyección 
+
+	float f = 1.0f / tan(M_PI / 6.0);
+	float far = 20.0;
+	float near = 0.1;
+	float aspectRatio = (float)width / (float)height;
+
+	proj[0].x = f / aspectRatio;
+	proj[1].y = f;
+	proj[2].z = (far + near) / (near - far);
+	proj[2].w = -1.0;
+	proj[3].z = (2.0 * far * near) / (near - far);
+	proj[3].w = 0.0;
+
+	IGlib::setProjMat(proj);
 }
 
 void idleFunc()
@@ -126,7 +146,53 @@ void idleFunc()
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
-	std::cout << "Se ha pulsado la tecla " << key << std::endl << std::endl;
+	float cameraSpeed = 0.5f; //Distancia que sumamos o restamos para mover la cámara
+	float rotationSpeed = 5.0f; //Ángulo que sumamos o restamos para girar la cámara
+
+	//WASD para movimiento, Q y E para rotación
+	if (key == 'W' || key == 'w') { //Movimiento hacia delante, sumamos a la posición frontal
+		cameraPos += cameraSpeed * frontCam;
+		targetPos += cameraSpeed * frontCam;
+	}
+
+	if (key == 'S' || key == 's') {	//Movimiento hacia atrás, restamos a la posición frontal
+		cameraPos -= cameraSpeed * frontCam;
+		targetPos -= cameraSpeed * frontCam;
+	}
+
+	if (key == 'D' || key == 'd') { //Movimiento hacia la derecha, sumamos a la derecha
+		cameraPos += cameraSpeed * rightCam;
+		targetPos += cameraSpeed * rightCam;
+	}
+
+	if (key == 'A' || key == 'a') { //Movimiento hacia la izquierda, restamos a la derecha
+		cameraPos -= cameraSpeed * rightCam;
+		targetPos -= cameraSpeed * rightCam;
+	}
+
+	if (key == 'Q' || key == 'q') { //Rotación hacia la izquierda, restamos al ángulo
+		ang -= rotationSpeed;
+	}
+
+	if (key == 'E' || key == 'e') { //Rotaación hacia la derecha, sumamos al ángulo
+		ang += rotationSpeed;
+	}
+
+	//Movemos el targetPos para hacer que la cámara gire
+	if (key == 'Q' || key == 'q' || key == 'E' || key == 'e') {
+		glm::vec3 frontDirection;
+		frontDirection.x = cos(glm::radians(ang)); //El coseno calcula las coordenadas en el eje X
+		frontDirection.y = 0.0f;
+		frontDirection.z = sin(glm::radians(ang)); //El seno calcula las coordenadas en el eje Z
+
+		targetPos = cameraPos + glm::normalize(frontDirection);
+	}
+
+	frontCam = glm::normalize(targetPos - cameraPos);
+	rightCam = glm::normalize(glm::cross(frontCam, upVector));
+	upCam = glm::normalize(glm::cross(rightCam, frontCam));
+
+	updateCameraVectors();
 }
 
 void mouseFunc(int button, int state, int x, int y)
@@ -166,6 +232,45 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 	std::cout << "en la posici�n " << x << " " << y << std::endl << std::endl;
 }
 
+//Movimiento de cámara
+void updateCameraVectors() {
+	glm::mat4 view = lookAtMatrix(cameraPos, targetPos, upVector);
+	IGlib::setViewMat(view);
+}
+
+glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up) {
+	glm::vec3 f = glm::normalize(target - pos);//front (eje Z)
+	glm::vec3 r = glm::normalize(glm::cross(f, up)); //right (eje X)
+	glm::vec3 u = glm::normalize(glm::cross(r, f));//up (eje Y)
+
+	glm::mat4 view = glm::mat4(1.0f); //Inicializamos la matriz de vista
+
+	//Rellenamos las primeras 3 columnas y filas (ROTACIÓN)
+	//Eje X
+	view[0][0] = r.x;
+	view[1][0] = r.y;
+	view[2][0] = r.z;
+
+	//Eje Y
+	view[0][1] = u.x;
+	view[1][1] = u.y;
+	view[2][1] = u.z;
+
+	//Eje Z (en negativo porque la cámara debe mirar hacia la z negativa)
+	view[0][2] = -f.x;
+	view[1][2] = -f.y;
+	view[2][2] = -f.z;
+
+	//Rellenamos la última columna (TRASLACIÓN)
+	view[3][0] = -glm::dot(r, pos);
+	view[3][1] = -glm::dot(u, pos);
+	view[3][2] = glm::dot(f, pos);
+
+	return view;
+}
+
+
+//Carga de objetos
 bool DoTheImportThing(const std::string& pFile) {
 	
 	Assimp::Importer importer;
