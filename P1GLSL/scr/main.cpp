@@ -13,12 +13,12 @@
 #include <assimp/postprocess.h> // Flags de procesado
 
 
-
+// ---------------------- Variables ---------------------- 
 //Idenficadores de los objetos de la escena
 int objId = -1;
 
 // Variables assimp
-const aiScene* sc; 
+//const aiScene* sc; 
 
 //Variables para movimiento de la cámara
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Posición de la cámara en el espacio
@@ -31,6 +31,12 @@ glm::vec3 frontCam;
 glm::vec3 rightCam;
 glm::vec3 upCam;
 
+//Variables para la matriz de proyección (Zoom)
+float fov = 60.0f; //Ángulo inicial de visión
+float windowRatio = 1.0f; //Proporción de la ventana (ancho-alto)
+
+
+////////////////////////////////////////////////
 //Declaraci�n de CB
 void resizeFunc(int width, int height);
 void idleFunc();
@@ -40,22 +46,28 @@ void mouseMoveFunc(int x, int y);
 void mousePassMoveFunc(int x, int y);
 void mouseWheelFunc(int wheel, int dir, int x, int y);
 
+//Métodos auxiliares
 void updateCameraVectors(); //Para actualizar los vectores de la cámara según la entrada del teclado
 glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up); //Para crear una matriz lookAt
 
+void updateProjectionMatrix(); //Para actualizar los datos de la matriz de proyección (Zoom)
+
+
+///////////////////////////////////////////////////
 // Carga de objetos
-bool DoTheImportThing(const std::string& pFile);
+//bool DoTheImportThing(const std::string& pFile);
 
 
+// ---------------------- Método main ---------------------- 
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v9.vert", "../shaders_P1/shader.v9.frag")) 
+	if (!IGlib::init("../shaders_P1/shader.v8.vert", "../shaders_P1/shader.v8.frag")) 
 		return -1;
 	
 
 	//Matriz de proyección
-	glm::mat4 proj = glm::mat4(1.0);
+	/*glm::mat4 proj = glm::mat4(1.0);
 
 	float f = 1.0f / tan(M_PI / 6.0); // Pi entre 6 para convertir a radianes
 	float far = 20.0; //Lo definimos nosotros
@@ -69,7 +81,8 @@ int main(int argc, char** argv)
 	proj[3].w = 0.0;
 
 	IGlib::setProjMat(proj);
-
+	*/
+	updateProjectionMatrix();
 
 	//Movimiento de la cámara (definimos 3 vectores perpendiculares, cada uno para cada eje)
 	frontCam = glm::normalize(targetPos - cameraPos); // Vector desde la posición de la cámara hasta la posición a la que apunta (Eje z)
@@ -78,20 +91,20 @@ int main(int argc, char** argv)
 
 	updateCameraVectors();
 	
-	if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
-		return -1;
-	}
+	//if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
+	//	return -1;
+	//}
 
 
 	//Creamos el objeto que vamos a visualizar
 	// Cuando se crea un objeto en OpenGL se crea un ID, este ID hay que conservarlo para luego operaciones que se hagan 
-	//objId = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex, cubeVertexPos, cubeVertexColor, cubeVertexNormal, cubeVertexTexCoord, cubeVertexTangent); 
+	objId = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex, cubeVertexPos, cubeVertexColor, cubeVertexNormal, cubeVertexTexCoord, cubeVertexTangent); 
 	// Cada vez que creemos un objeto, tenemos que guardar ese ID
 
-	//glm::mat4 modelMat = glm::mat4(1.0f);
-	//IGlib::setModelMat(objId, modelMat); // Te dice, dime el id y la matriz
+	glm::mat4 modelMat = glm::mat4(1.0f);
+	IGlib::setModelMat(objId, modelMat); // Te dice, dime el id y la matriz
 	//Incluir texturas aqu�.
-	//IGlib::addColorTex(objId, "../img/color.png");
+	IGlib::addColorTex(objId, "../img/color.png");
 
 	//CBs (Callbacks)
 	// Cada vez que el sistema detecte que el usuario ha rescalado la pantalla, hecho click, etc. Recoge los eventos y nos avisa
@@ -110,12 +123,13 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+// ---------------------- CB ---------------------- 
 void resizeFunc(int width, int height)
 {
 	//AJUSTAR EL ASPECT RATIO MEDIANTE MATRIZ DE PROYECCIÓN
 	// Replicamos la matriz de proyección con la variable aspectRatio
-
-		glm::mat4 proj = glm::mat4(1.0); //Matriz de proyección 
+	/*
+	glm::mat4 proj = glm::mat4(1.0); //Matriz de proyección 
 
 	float f = 1.0f / tan(M_PI / 6.0);
 	float far = 20.0;
@@ -130,6 +144,13 @@ void resizeFunc(int width, int height)
 	proj[3].w = 0.0;
 
 	IGlib::setProjMat(proj);
+	*/
+
+	if (height == 0)
+		height = 1; //Para evitar divisiones entre 0
+
+	windowRatio = (float)width / (float)height;
+	updateProjectionMatrix();
 }
 
 void idleFunc()
@@ -174,7 +195,7 @@ void keyboardFunc(unsigned char key, int x, int y)
 		ang -= rotationSpeed;
 	}
 
-	if (key == 'E' || key == 'e') { //Rotaación hacia la derecha, sumamos al ángulo
+	if (key == 'E' || key == 'e') { //Rotación hacia la derecha, sumamos al ángulo
 		ang += rotationSpeed;
 	}
 
@@ -224,15 +245,34 @@ void mousePassMoveFunc(int x, int y)
 }
 void mouseWheelFunc(int wheel, int dir, int x, int y)
 {
+	/*
 	if (dir > 0)
 		std::cout << "Se ha pulsado la rueda del rat�n hacia arriba ";
 	else
 		std::cout << "Se ha pulsado la rueda del rat�n hacia abajo ";
 
 	std::cout << "en la posici�n " << x << " " << y << std::endl << std::endl;
+	*/
+
+	//Zoom con la rueda de ratón
+	float zoomSpeed = 3.0f; //Ángulo que sumamos al hacer zoom
+
+	if (dir > 0) {
+		fov -= zoomSpeed; //Si vamos hacia arriba, el fov se disminuye (más cerca)
+	} else {
+		fov += zoomSpeed; //Si va hacia abajo, el fov aumenta (más lejos)
+	}
+
+	//Limitamos el fov para no romperlo :/
+	if (fov < 1.0f)
+		fov = 1.0f; // Zoom máximo
+	if (fov > 120.0f)
+		fov = 120.0f; //Zoom mínimo
+
+	updateProjectionMatrix();
 }
 
-//Movimiento de cámara
+// ---------------------- Movimiento de cámara ---------------------- 
 void updateCameraVectors() {
 	glm::mat4 view = lookAtMatrix(cameraPos, targetPos, upVector);
 	IGlib::setViewMat(view);
@@ -269,8 +309,26 @@ glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up) {
 	return view;
 }
 
+void updateProjectionMatrix() {
+	glm::mat4 proj = glm::mat4(1.0);
 
-//Carga de objetos
+	float f = 1.0f / tan(glm::radians(fov) / 2.0); // Convertimos el fov a radianes y sacamos la tagente de la mitad
+	float far = 20.0; 
+	float near = 0.1; 
+
+	proj[0].x = f/windowRatio; 
+	proj[1].y = f;
+	proj[2].z = (far + near) / (near - far);
+	proj[2].w = -1.0;
+	proj[3].z = (2.0 * far * near) / (near - far);
+	proj[3].w = 0.0;
+
+	IGlib::setProjMat(proj);
+}
+
+
+// ---------------------- Carga de objetos ---------------------- 
+/*
 bool DoTheImportThing(const std::string& pFile) {
 	
 	Assimp::Importer importer;
@@ -346,3 +404,4 @@ bool DoTheImportThing(const std::string& pFile) {
 
 	return true;
 }
+*/
