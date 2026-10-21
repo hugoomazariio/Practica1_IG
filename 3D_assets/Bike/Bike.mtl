@@ -1,4 +1,4 @@
-# Blender 3.4.0 MTL File: 'Model.blend'
+# Blender 5.1.2 MTL File: 'Model.blend'
 # www.blender.org
 
 newmtl Model001_Material001
@@ -9,8 +9,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd C:/T_KanedaBike_D.png
-map_Bump C:/T_KanedaBike_NRM.png
+map_Kd textures/T_KanedaBike_D.png
+map_Bump textures/T_KanedaBike_NRM.png
 
 newmtl Model001_Material002
 Ns 1000.000000
@@ -20,5 +20,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd C:/glass_Dd.png
-map_Bump C:/glass_N.png
+map_Kd textures/glass_Dd.png
+map_Bump textures/glass_N.png
