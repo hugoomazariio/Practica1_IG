@@ -25,13 +25,20 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Posición de la cámara en
 glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cámara
 glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); //Vector hacia arriba (eje Y positivo)
 
-float ang = -90.0f; //Ángulo inicial de la cámara. Comenzamos en -90 para que la cámara comience mirando hacia delante 
+float angHor = -90.0f; //Ángulo inicial de la cámara (horizontal). Comenzamos en -90 para que la cámara comience mirando hacia delante 
+
+float angVert = 0.0f; //ängulo inicial de la cámara (vertical)
+
+//Variables para controlar el movimiento del ratón
+float lastX = 400.0f;
+float lastY = 300.0f;
+bool firstMouse = true; // ??????
 
 glm::vec3 frontCam;
 glm::vec3 rightCam;
 glm::vec3 upCam;
 
-//Variables para la matriz de proyección (Zoom)
+//Variables para zoom 
 float fov = 60.0f; //Ángulo inicial de visión
 float windowRatio = 1.0f; //Proporción de la ventana (ancho-alto)
 
@@ -192,19 +199,19 @@ void keyboardFunc(unsigned char key, int x, int y)
 	}
 
 	if (key == 'Q' || key == 'q') { //Rotación hacia la izquierda, restamos al ángulo
-		ang -= rotationSpeed;
+		angHor -= rotationSpeed;
 	}
 
 	if (key == 'E' || key == 'e') { //Rotación hacia la derecha, sumamos al ángulo
-		ang += rotationSpeed;
+		angHor += rotationSpeed;
 	}
 
 	//Movemos el targetPos para hacer que la cámara gire
 	if (key == 'Q' || key == 'q' || key == 'E' || key == 'e') {
 		glm::vec3 frontDirection;
-		frontDirection.x = cos(glm::radians(ang)); //El coseno calcula las coordenadas en el eje X
+		frontDirection.x = cos(glm::radians(angHor)); //El coseno calcula las coordenadas en el eje X
 		frontDirection.y = 0.0f;
-		frontDirection.z = sin(glm::radians(ang)); //El seno calcula las coordenadas en el eje Z
+		frontDirection.z = sin(glm::radians(angHor)); //El seno calcula las coordenadas en el eje Z
 
 		targetPos = cameraPos + glm::normalize(frontDirection);
 	}
@@ -241,7 +248,43 @@ void mouseMoveFunc(int x, int y)
 
 void mousePassMoveFunc(int x, int y)
 {
-	//std::cout << "Pasivo en la posici�n " << x << " " << y << std::endl << std::endl;
+	if (firstMouse) {
+		lastX = x;
+		lastY = y;
+		firstMouse = false;
+	}
+
+	float xOffset = x - lastX;
+	float yOffset = y - lastY;
+
+	lastX = x;
+	lastY = y;
+
+	float sensitivity = 0.1f;
+	xOffset *= sensitivity;
+	yOffset *= sensitivity;
+
+	angHor += xOffset;
+	angVert += yOffset;
+
+	if (angVert > 89.0f)
+		angVert = 89.0f;
+	if (angVert < -98.9f)
+		angVert = -89.0f;
+
+	glm::vec3 frontDirection;
+	frontDirection.x = cos(glm::radians(angHor)) * cos(glm::radians(angVert));
+	frontDirection.y = sin(glm::radians(angVert));
+	frontDirection.z = sin(glm::radians(angHor)) * cos(glm::radians(angVert));
+
+	targetPos = cameraPos + glm::normalize(frontDirection);
+
+	frontCam = glm::normalize(targetPos - cameraPos);
+	rightCam = glm::normalize(glm::cross(frontCam, upVector));
+	upCam = glm::normalize(glm::cross(rightCam, frontCam));
+
+	updateCameraVectors();
+
 }
 void mouseWheelFunc(int wheel, int dir, int x, int y)
 {
