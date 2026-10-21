@@ -26,21 +26,21 @@ glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cáma
 glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); //Vector hacia arriba (eje Y positivo)
 
 float angHor = -90.0f; //Ángulo inicial de la cámara (horizontal). Comenzamos en -90 para que la cámara comience mirando hacia delante 
-
-float angVert = 0.0f; //ängulo inicial de la cámara (vertical)
+float angVert = 0.0f; //Ángulo inicial de la cámara (vertical)
 
 //Variables para controlar el movimiento del ratón
 float lastX = 400.0f;
 float lastY = 300.0f;
-bool firstMouse = true; // ??????
+bool firstMouse = true; // Nos ayuda a reducir saltos incómodos al mover la cámara
+bool rightClicPressed; // Detecta si se está pulsando el clic derecho para el movimiento de cámara
 
-glm::vec3 frontCam;
-glm::vec3 rightCam;
-glm::vec3 upCam;
+glm::vec3 frontCam; //Vector que apunta delante de la cámara
+glm::vec3 rightCam; //Vector que apunta a la derecha de la cámara
+glm::vec3 upCam; //Vector que apunta arriba de la cámara
 
 //Variables para zoom 
 float fov = 60.0f; //Ángulo inicial de visión
-float windowRatio = 1.0f; //Proporción de la ventana (ancho-alto)
+float aspectRatio = 1.0f; //Proporción de la ventana (ancho-alto)
 
 
 ////////////////////////////////////////////////
@@ -72,26 +72,10 @@ int main(int argc, char** argv)
 	if (!IGlib::init("../shaders_P1/shader.v8.vert", "../shaders_P1/shader.v8.frag")) 
 		return -1;
 	
-
 	//Matriz de proyección
-	/*glm::mat4 proj = glm::mat4(1.0);
-
-	float f = 1.0f / tan(M_PI / 6.0); // Pi entre 6 para convertir a radianes
-	float far = 20.0; //Lo definimos nosotros
-	float near = 0.1; //Lo definimos nosotros
-
-	proj[0].x = f; //elemento 0, 0
-	proj[1].y = f;
-	proj[2].z = (far + near) / (near - far);
-	proj[2].w = -1.0;
-	proj[3].z = (2.0 * far * near) / (near - far);
-	proj[3].w = 0.0;
-
-	IGlib::setProjMat(proj);
-	*/
 	updateProjectionMatrix();
 
-	//Movimiento de la cámara (definimos 3 vectores perpendiculares, cada uno para cada eje)
+	//Matriz de vista - Movimiento de la cámara (definimos 3 vectores perpendiculares, cada uno para cada eje)
 	frontCam = glm::normalize(targetPos - cameraPos); // Vector desde la posición de la cámara hasta la posición a la que apunta (Eje z)
 	rightCam = glm::normalize(glm::cross(frontCam, upVector)); //Vector hacia la derecha (eje X)
 	upCam = glm::normalize(glm::cross(rightCam, frontCam)); //Vector hacia arriba (eje Y)
@@ -113,7 +97,8 @@ int main(int argc, char** argv)
 	//Incluir texturas aqu�.
 	IGlib::addColorTex(objId, "../img/color.png");
 
-	//CBs (Callbacks)
+
+	// CBs (Callbacks)
 	// Cada vez que el sistema detecte que el usuario ha rescalado la pantalla, hecho click, etc. Recoge los eventos y nos avisa
 	IGlib::setResizeCB(resizeFunc);
 	IGlib::setIdleCB(idleFunc);
@@ -124,7 +109,7 @@ int main(int argc, char** argv)
 	IGlib::setMouseWheelMoveCB(mouseWheelFunc);
 
 
-	//Mainloop
+	// Mainloop
 	IGlib::mainLoop();
 	IGlib::destroy();
 	return 0;
@@ -134,29 +119,10 @@ int main(int argc, char** argv)
 void resizeFunc(int width, int height)
 {
 	//AJUSTAR EL ASPECT RATIO MEDIANTE MATRIZ DE PROYECCIÓN
-	// Replicamos la matriz de proyección con la variable aspectRatio
-	/*
-	glm::mat4 proj = glm::mat4(1.0); //Matriz de proyección 
-
-	float f = 1.0f / tan(M_PI / 6.0);
-	float far = 20.0;
-	float near = 0.1;
-	float aspectRatio = (float)width / (float)height;
-
-	proj[0].x = f / aspectRatio;
-	proj[1].y = f;
-	proj[2].z = (far + near) / (near - far);
-	proj[2].w = -1.0;
-	proj[3].z = (2.0 * far * near) / (near - far);
-	proj[3].w = 0.0;
-
-	IGlib::setProjMat(proj);
-	*/
-
 	if (height == 0)
 		height = 1; //Para evitar divisiones entre 0
 
-	windowRatio = (float)width / (float)height;
+	aspectRatio = (float)width / (float)height; //Para guardar el ratio de la cámara (matriz de proyección)
 	updateProjectionMatrix();
 }
 
@@ -174,6 +140,7 @@ void idleFunc()
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
+	//MOVIMIENTO DE LA CÁMARA MEDIANTE TECLADO
 	float cameraSpeed = 0.5f; //Distancia que sumamos o restamos para mover la cámara
 	float rotationSpeed = 5.0f; //Ángulo que sumamos o restamos para girar la cámara
 
@@ -216,6 +183,7 @@ void keyboardFunc(unsigned char key, int x, int y)
 		targetPos = cameraPos + glm::normalize(frontDirection);
 	}
 
+	// Actualizamos los vectores de la cámara
 	frontCam = glm::normalize(targetPos - cameraPos);
 	rightCam = glm::normalize(glm::cross(frontCam, upVector));
 	upCam = glm::normalize(glm::cross(rightCam, frontCam));
@@ -225,41 +193,88 @@ void keyboardFunc(unsigned char key, int x, int y)
 
 void mouseFunc(int button, int state, int x, int y)
 {
-
-	if (state == 0)
-		std::cout << "Se ha pulsado el bot�n ";
-	else
-		std::cout << "Se ha soltado el bot�n ";
-
-	if (button == 0) std::cout << "de la izquierda del rat�n " << std::endl;
-	if (button == 1) std::cout << "central del rat�n " << std::endl;
-	if (button == 2) std::cout << "de la derecha del rat�n " << std::endl;
-
-
-	std::cout << "en la posici�n " << x << " " << y << std::endl << std::endl;
+	if (button == 2) { //Clic derecho
+		rightClicPressed = true;
+		firstMouse = true;
+	}
+	else {
+		rightClicPressed = false;
+	}
 }
 
 
 void mouseMoveFunc(int x, int y)
 {
+	//MOVIMIENTO DE LA CÁMARA CON EL RATÓN
+	if (!rightClicPressed) //Si el clic derecho no está pulsado, no se mueve la cámara
+		return;
 
-	//std::cout << "Movimiento con presi�n en la posici�n " << x << " " << y << std::endl << std::endl; 
-}
-
-void mousePassMoveFunc(int x, int y)
-{
-	if (firstMouse) {
+	if (firstMouse) { //Guarda las posiciones actuales del ratón al pulsar el clic derecho, para evitar saltos de posición
 		lastX = x;
 		lastY = y;
 		firstMouse = false;
 	}
 
+	//Calculamos cuánto se ha movido el ratón (en píxeles)
 	float xOffset = x - lastX;
-	float yOffset = y - lastY;
+	float yOffset = lastY - y;
 
+	//Actualizamos las posiciones
 	lastX = x;
 	lastY = y;
 
+	//Aplicamos sensibilidad
+	float sensitivity = 0.1f;
+	xOffset *= sensitivity; //Lo multiplicamos al offset para que el movimiento no sea muy brusco
+	yOffset *= sensitivity;
+
+	//Añadimos cuánto se ha movido la cámara a los ángulos horizontal y vertical
+	angHor += xOffset;
+	angVert += yOffset;
+
+	//Limitamos los ángulos para no romperlo (Si el ángulo vertical llega a 90 grados, puede entrar en conflicto con el vector upVector y romper la matriz de vista)
+	if (angVert > 89.0f)
+		angVert = 89.0f;
+	if (angVert < -89.9f)
+		angVert = -89.0f;
+
+	//Convertimos los ángulos a coordenadas para saber a dónde estamos mirando tras mover el ratón 
+	glm::vec3 frontDirection;
+	frontDirection.x = cos(glm::radians(angHor)) * cos(glm::radians(angVert)); //Coseno para calcular el eje x (deerecha-izquierda) y coseno para el eje y (la proyección del ángulo vertical en el eje horizontal)
+	frontDirection.y = sin(glm::radians(angVert)); //La altura depende solo del ángulo vertical (con el seno)
+	frontDirection.z = sin(glm::radians(angHor)) * cos(glm::radians(angVert)); //Seno para calcular el eje z (hacia delante- hacia atrás) y coseno para el eje y (arriba-abajo)
+
+	//Al calcular dónde estamos mirando tras el movimiento, se lo sumamos a la posición actual para girar la cámara con el targetPos
+	targetPos = cameraPos + glm::normalize(frontDirection);
+
+	//Volvemos a calcular los vectores de la cámara
+	frontCam = glm::normalize(targetPos - cameraPos);
+	rightCam = glm::normalize(glm::cross(frontCam, upVector));
+	upCam = glm::normalize(glm::cross(rightCam, frontCam));
+
+	updateCameraVectors();
+}
+
+void mousePassMoveFunc(int x, int y)
+{
+	/*
+	if (!rightClicPressed) //Si el clic derecho no está pulsado, no se mueve la cámara
+		return; 
+
+	if (firstMouse) { //Para prevenir un salto brusco al iniciar el movimieento de cámara
+		lastX = x;
+		lastY = y;
+		firstMouse = false;
+	}
+
+	//Calculamos cuánto se ha movido el ratón
+	float xOffset = x - lastX;
+	float yOffset = y - lastY;
+
+	lastX = x; 
+	lastY = y;
+
+	//Aplicamos sensibilidad
 	float sensitivity = 0.1f;
 	xOffset *= sensitivity;
 	yOffset *= sensitivity;
@@ -267,6 +282,7 @@ void mousePassMoveFunc(int x, int y)
 	angHor += xOffset;
 	angVert += yOffset;
 
+	//Limitamos los ángulos para no romperlo
 	if (angVert > 89.0f)
 		angVert = 89.0f;
 	if (angVert < -98.9f)
@@ -284,6 +300,7 @@ void mousePassMoveFunc(int x, int y)
 	upCam = glm::normalize(glm::cross(rightCam, frontCam));
 
 	updateCameraVectors();
+	*/
 
 }
 void mouseWheelFunc(int wheel, int dir, int x, int y)
@@ -359,7 +376,7 @@ void updateProjectionMatrix() {
 	float far = 20.0; 
 	float near = 0.1; 
 
-	proj[0].x = f/windowRatio; 
+	proj[0].x = f/aspectRatio; 
 	proj[1].y = f;
 	proj[2].z = (far + near) / (near - far);
 	proj[2].w = -1.0;
