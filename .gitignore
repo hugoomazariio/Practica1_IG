@@ -26,4 +26,9 @@
 *.out
 *.app
 
+# OS generated files #
+.DS_Store
+.AppleDouble
+.LSOverride
+
 assimp
