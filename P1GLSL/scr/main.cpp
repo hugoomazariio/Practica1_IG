@@ -88,11 +88,11 @@ int main(int argc, char** argv)
 	updateCameraVectors();
 	
 	//se pasa el .obj de los objetos que se quieren cargar si no se encuenta devuelve -1
-	if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
+	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", objeto1Id)) {
 		return -1;
 	}
 
-	if (!DoTheOtherImportThing("../3D_assets/AlienAnimal.obj")) {
+	if (!DoTheOtherImportThing("../3D_assets/Firefly/Firefly.obj", objeto2Id)) {
 		return -1;
 	}
 
@@ -138,14 +138,14 @@ void resizeFunc(int width, int height)
 
 void idleFunc()
 {
-	static float angle = 0.0f;
+	/*static float angle = 0.0f;
 
 	angle = (angle < M_PI * 2.0) ? angle + 0.001 : 0.0f; // Si el ángulo es más de 60 grados, lo amplío, y sino reseteo 0.0. Hará que esté continuamente en rotación
 
 	glm::mat4 modelMat = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,-6.0f)); // Construye una matriz de translación con lo que yo le diga
 	modelMat = glm::rotate(modelMat, angle, glm::vec3(1.0f, 0.0f, 0.0f)); // Yo altero la modelMatrix del cubo
 	modelMat = glm::rotate(modelMat, angle, glm::vec3(0.0f, 1.0f, 0.0f)); // El orden de las matrices importan mucho en el movimiento!!!
-	IGlib::setModelMat(objId, modelMat);
+	IGlib::setModelMat(objId, modelMat);*/
 }
 
 void keyboardFunc(unsigned char key, int x, int y)
@@ -413,12 +413,12 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId) {
 			}
 		}
 
-		objId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
+		outObjId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
 		glm::mat4 modelMatObjeto = glm::mat4(1.0f); //se crea una matriz de transformacion 4x4
 		modelMatObjeto = glm::scale(modelMatObjeto, glm::vec3(0.15f, 0.15f, 0.15f));   // Escalado del objeto
 		modelMatObjeto = glm::translate(modelMatObjeto, glm::vec3(2.5f, -6.8f, -2.0f)); // Posición 
 		IGlib::setModelMat(outObjId, modelMatObjeto); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
-		
+
 	}
 
 	return true;
@@ -491,7 +491,7 @@ bool DoTheOtherImportThing(const std::string& pFile, int &outObjId) {
 			}
 		}
 
-		objId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
+		outObjId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
 		glm::mat4 modelMatObjeto = glm::mat4(1.0f); //se crea una matriz de transformacion 4x4
 		modelMatObjeto = glm::scale(modelMatObjeto, glm::vec3(0.15f, 0.15f, 0.15f));   // Escalado del objeto
 		modelMatObjeto = glm::translate(modelMatObjeto, glm::vec3(2.5f, -6.8f, -2.0f)); // Posición
