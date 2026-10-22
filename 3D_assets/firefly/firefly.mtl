@@ -1,0 +1,33 @@
+# Firefly materials (PBR extensions + classic maps)
+newmtl firefly_body
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.25 0.25 0.25
+Ke 1.0 1.0 1.0
+Ns 60
+d 1.0
+illum 2
+Pr 0.5
+Pm 0.0
+map_Kd textures/firefly_albedo.png
+map_Ke textures/firefly_emissive.png
+map_Pr textures/firefly_roughness.png
+map_Pm textures/firefly_metallic.png
+map_Bump -bm 1.0 textures/firefly_normal.png
+norm textures/firefly_normal.png
+
+newmtl firefly_wings
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.35 0.35 0.35
+Ke 0.0 0.0 0.0
+Ns 90
+d 1.0
+illum 2
+Pr 0.25
+Pm 0.0
+map_Kd textures/firefly_albedo.png
+map_d textures/firefly_opacity.png
+map_Pr textures/firefly_roughness.png
+map_Bump -bm 1.0 textures/firefly_normal.png
+norm textures/firefly_normal.png
