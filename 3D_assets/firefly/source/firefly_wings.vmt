@@ -1,8 +1,0 @@
-"VertexLitGeneric"
-{
-	"$basetexture" "models/firefly/firefly_albedo"
-	"$bumpmap" "models/firefly/firefly_normal_dx"
-	"$translucent" 1
-	"$alphatest" 0
-	"$nocull" 1
-}
