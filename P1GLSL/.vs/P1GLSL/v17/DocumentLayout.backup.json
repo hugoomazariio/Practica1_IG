@@ -1,13 +1,16 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\",
+  "WorkspaceRootPath": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\scr\\BOX.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\BOX.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\BOX.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
@@ -26,16 +29,13 @@
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -51,11 +51,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "main.cpp",
-              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
+              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
               "RelativeDocumentMoniker": "scr\\main.cpp",
-              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
+              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
               "RelativeToolTip": "scr\\main.cpp",
-              "ViewState": "AgIAAOcAAAAAAAAAAAAAAPQAAABIAAAAAAAAAA==",
+              "ViewState": "AgIAAI8AAAAAAAAAAAAAAFoAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-09-24T15:02:11.931Z",
               "IsPinned": true,
@@ -67,59 +67,50 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "shader.v9.vert",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.vert",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.vert",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.vert",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v9.vert",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-15T15:36:55.815Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "shader.v9.frag",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.frag",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v9.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v9.frag",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-15T15:35:52.344Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "shader.v8.vert",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.vert",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v8.vert",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.vert",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v8.vert",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-15T15:33:01.158Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 1,
               "Title": "shader.v8.frag",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v8.frag",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\shaders_P1\\shader.v8.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v8.frag",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-15T15:27:24.972Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "BOX.h",
-              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\scr\\BOX.h",
+              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\BOX.h",
               "RelativeDocumentMoniker": "scr\\BOX.h",
-              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1_IG\\P1GLSL\\scr\\BOX.h",
+              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\BOX.h",
               "RelativeToolTip": "scr\\BOX.h",
               "ViewState": "AgIAACcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
@@ -127,60 +118,50 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "shader.v4.frag",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag",
-              "RelativeDocumentMoniker": "..\\..\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag",
-              "RelativeToolTip": "..\\..\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-08T15:10:30.243Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "shader.v1.vert",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert",
-              "RelativeDocumentMoniker": "..\\..\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert",
-              "RelativeToolTip": "..\\..\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-08T15:10:29.011Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "shader.v0.vert",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert",
-              "RelativeDocumentMoniker": "..\\..\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert",
-              "RelativeToolTip": "..\\..\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-08T15:10:25.039Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "shader.v7.vert",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert",
-              "RelativeDocumentMoniker": "..\\..\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert",
-              "RelativeToolTip": "..\\..\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-01T16:34:47.931Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "shader.v7.frag",
               "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag",
-              "RelativeDocumentMoniker": "..\\..\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag",
               "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag",
-              "RelativeToolTip": "..\\..\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-10-01T16:34:47.39Z"
             }

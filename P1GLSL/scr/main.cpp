@@ -22,7 +22,7 @@ int objeto1Id = -1;
 int objeto2Id = -1;
 
 // Variables assimp
-//const aiScene* sc; 
+const aiScene* sc; 
 
 //Variables para movimiento de la cámara
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Posición de la cámara en el espacio
@@ -66,15 +66,15 @@ void updateProjectionMatrix(); //Para actualizar los datos de la matriz de proye
 
 ///////////////////////////////////////////////////
 // Carga de objetos
-//bool DoTheImportThing(const std::string& pFile, int &outObjId);
-//bool DoTheOtherImportThing(const std::string& pFile, int &outObjId);
+bool DoTheImportThing(const std::string& pFile, int &outObjId);
+bool DoTheOtherImportThing(const std::string& pFile, int &outObjId);
 
 
 // ---------------------- Método main ---------------------- 
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v8.vert", "../shaders_P1/shader.v8.frag")) 
+	if (!IGlib::init("../shaders_P1/shader.v9.vert", "../shaders_P1/shader.v9.frag")) 
 		return -1;
 	
 	//Matriz de proyección
@@ -87,25 +87,25 @@ int main(int argc, char** argv)
 
 	updateCameraVectors();
 	
-	//se pasa ell .obj de los objetos que se quieren cargar si no se encuenta devuelve -1
-	//if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
-	//	return -1;
-	//}
+	//se pasa el .obj de los objetos que se quieren cargar si no se encuenta devuelve -1
+	if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
+		return -1;
+	}
 
-	//if (!DoTheOtherImportThing("../3D_assets/AlienAnimal.obj")) {
-	//	return -1;
-	//}
+	if (!DoTheOtherImportThing("../3D_assets/AlienAnimal.obj")) {
+		return -1;
+	}
 
 
 	//Creamos el objeto que vamos a visualizar
 	// Cuando se crea un objeto en OpenGL se crea un ID, este ID hay que conservarlo para luego operaciones que se hagan 
-	objId = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex, cubeVertexPos, cubeVertexColor, cubeVertexNormal, cubeVertexTexCoord, cubeVertexTangent); 
+	//objId = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex, cubeVertexPos, cubeVertexColor, cubeVertexNormal, cubeVertexTexCoord, cubeVertexTangent); 
 	// Cada vez que creemos un objeto, tenemos que guardar ese ID
 
-	glm::mat4 modelMat = glm::mat4(1.0f);
-	IGlib::setModelMat(objId, modelMat); // Te dice, dime el id y la matriz
+	//glm::mat4 modelMat = glm::mat4(1.0f);
+	//IGlib::setModelMat(objId, modelMat); // Te dice, dime el id y la matriz
 	//Incluir texturas aqu�.
-	IGlib::addColorTex(objId, "../img/color.png");
+	//IGlib::addColorTex(objId, "../img/color.png");
 
 
 	// CBs (Callbacks)
@@ -267,64 +267,12 @@ void mouseMoveFunc(int x, int y)
 
 void mousePassMoveFunc(int x, int y)
 {
-	/*
-	if (!rightClicPressed) //Si el clic derecho no está pulsado, no se mueve la cámara
-		return; 
-
-	if (firstMouse) { //Para prevenir un salto brusco al iniciar el movimieento de cámara
-		lastX = x;
-		lastY = y;
-		firstMouse = false;
-	}
-
-	//Calculamos cuánto se ha movido el ratón
-	float xOffset = x - lastX;
-	float yOffset = y - lastY;
-
-	lastX = x; 
-	lastY = y;
-
-	//Aplicamos sensibilidad
-	float sensitivity = 0.1f;
-	xOffset *= sensitivity;
-	yOffset *= sensitivity;
-
-	angHor += xOffset;
-	angVert += yOffset;
-
-	//Limitamos los ángulos para no romperlo
-	if (angVert > 89.0f)
-		angVert = 89.0f;
-	if (angVert < -98.9f)
-		angVert = -89.0f;
-
-	glm::vec3 frontDirection;
-	frontDirection.x = cos(glm::radians(angHor)) * cos(glm::radians(angVert));
-	frontDirection.y = sin(glm::radians(angVert));
-	frontDirection.z = sin(glm::radians(angHor)) * cos(glm::radians(angVert));
-
-	targetPos = cameraPos + glm::normalize(frontDirection);
-
-	frontCam = glm::normalize(targetPos - cameraPos);
-	rightCam = glm::normalize(glm::cross(frontCam, upVector));
-	upCam = glm::normalize(glm::cross(rightCam, frontCam));
-
-	updateCameraVectors();
-	*/
 
 }
 void mouseWheelFunc(int wheel, int dir, int x, int y)
 {
-	/*
-	if (dir > 0)
-		std::cout << "Se ha pulsado la rueda del rat�n hacia arriba ";
-	else
-		std::cout << "Se ha pulsado la rueda del rat�n hacia abajo ";
 
-	std::cout << "en la posici�n " << x << " " << y << std::endl << std::endl;
-	*/
-
-	//Zoom con la rueda de ratón
+	//ZOOM CON LA RUEDA DEL RATÓN
 	float zoomSpeed = 3.0f; //Ángulo que sumamos al hacer zoom
 
 	if (dir > 0) {
@@ -398,7 +346,7 @@ void updateProjectionMatrix() {
 
 
 // ---------------------- Carga de objetos ---------------------- 
-/*
+
 bool DoTheImportThing(const std::string& pFile, int &outObjId) {
 	
 	Assimp::Importer importer;
@@ -476,7 +424,7 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId) {
 	return true;
 }
 
-/*
+
 bool DoTheOtherImportThing(const std::string& pFile, int &outObjId) {
 
 	Assimp::Importer importer;
@@ -553,4 +501,3 @@ bool DoTheOtherImportThing(const std::string& pFile, int &outObjId) {
 
 	return true;
 }
-*/
