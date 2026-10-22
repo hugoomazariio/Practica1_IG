@@ -1,0 +1,181 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v9.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v8.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v9.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v8.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\scr\\BOX.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\BOX.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 275,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
+              "RelativeDocumentMoniker": "scr\\main.cpp",
+              "ToolTip": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
+              "RelativeToolTip": "scr\\main.cpp",
+              "ViewState": "AgIAAM4BAAAAAAAAAAAAAOMBAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-10-20T14:35:46.936Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "shader.v4.frag",
+              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag",
+              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v4.frag",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.953Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "shader.v1.vert",
+              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert",
+              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v1.vert",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.956Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "shader.v0.vert",
+              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert",
+              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\Practica1\\trabajo_IG\\P1GLSL\\shaders_P1\\shader.v0.vert",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.958Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "shader.v7.vert",
+              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert",
+              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.vert",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.96Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "shader.v7.frag",
+              "DocumentMoniker": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag",
+              "ToolTip": "F:\\_UNIVERSIDAD\\Segundo\\IG\\P1GLSL\\P1GLSL\\shaders_P1\\shader.v7.frag",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.962Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "shader.v9.vert",
+              "DocumentMoniker": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v9.vert",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.vert",
+              "ToolTip": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v9.vert",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v9.vert",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.947Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "shader.v9.frag",
+              "DocumentMoniker": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v9.frag",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.frag",
+              "ToolTip": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v9.frag",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v9.frag",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.949Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "shader.v8.vert",
+              "DocumentMoniker": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v8.vert",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v8.vert",
+              "ToolTip": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v8.vert",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v8.vert",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.95Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "shader.v8.frag",
+              "DocumentMoniker": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v8.frag",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v8.frag",
+              "ToolTip": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\shaders_P1\\shader.v8.frag",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v8.frag",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-10-20T14:35:46.951Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BOX.h",
+              "DocumentMoniker": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\scr\\BOX.h",
+              "RelativeDocumentMoniker": "scr\\BOX.h",
+              "ToolTip": "C:\\Users\\josel\\OneDrive\\Desktop\\Practica1_IG\\P1GLSL\\scr\\BOX.h",
+              "RelativeToolTip": "scr\\BOX.h",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-10-20T14:35:46.952Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -17,6 +17,10 @@
 //Idenficadores de los objetos de la escena
 int objId = -1;
 
+//creación de variables para los nuevos objetos a cargar en escena
+int objeto1Id = -1;
+int objeto2Id = -1;
+
 // Variables assimp
 //const aiScene* sc; 
 
@@ -62,7 +66,8 @@ void updateProjectionMatrix(); //Para actualizar los datos de la matriz de proye
 
 ///////////////////////////////////////////////////
 // Carga de objetos
-//bool DoTheImportThing(const std::string& pFile);
+//bool DoTheImportThing(const std::string& pFile, int &outObjId);
+//bool DoTheOtherImportThing(const std::string& pFile, int &outObjId);
 
 
 // ---------------------- Método main ---------------------- 
@@ -82,7 +87,12 @@ int main(int argc, char** argv)
 
 	updateCameraVectors();
 	
+	//se pasa ell .obj de los objetos que se quieren cargar si no se encuenta devuelve -1
 	//if (!DoTheImportThing("../3D_assets/AlienAnimal.obj")) {
+	//	return -1;
+	//}
+
+	//if (!DoTheOtherImportThing("../3D_assets/AlienAnimal.obj")) {
 	//	return -1;
 	//}
 
@@ -389,7 +399,7 @@ void updateProjectionMatrix() {
 
 // ---------------------- Carga de objetos ---------------------- 
 /*
-bool DoTheImportThing(const std::string& pFile) {
+bool DoTheImportThing(const std::string& pFile, int &outObjId) {
 	
 	Assimp::Importer importer;
 	sc = importer.ReadFile(pFile, 
@@ -456,10 +466,89 @@ bool DoTheImportThing(const std::string& pFile) {
 		}
 
 		objId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
-		glm::mat4 modelMat2 = glm::scale(glm::mat4(1.0), glm::vec3(0.2)); 
-		IGlib::setModelMat(objId, modelMat2);
-		IGlib::addColorTex(objId, "../3D_assets/Alien-Animal-Base-Diffuse.jpg");
+		glm::mat4 modelMatObjeto = glm::mat4(1.0f); //se crea una matriz de transformacion 4x4
+		modelMatObjeto = glm::scale(modelMatObjeto, glm::vec3(0.15f, 0.15f, 0.15f));   // Escalado del objeto
+		modelMatObjeto = glm::translate(modelMatObjeto, glm::vec3(2.5f, -6.8f, -2.0f)); // Posición 
+		IGlib::setModelMat(outObjId, modelMatObjeto); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
 		
+	}
+
+	return true;
+}
+
+/*
+bool DoTheOtherImportThing(const std::string& pFile, int &outObjId) {
+
+	Assimp::Importer importer;
+	sc = importer.ReadFile(pFile,
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_SortByPType);
+
+		// Si falla import dime algo
+	if (!sc) {
+		std::cout << "Falló la carga" << std::endl;
+		return false;
+	}
+	std::cout << "Se han cargado " << sc->mNumMeshes << " meshes" << std::endl;
+
+	// bucle de carga
+	for (unsigned int n = 0; n < sc->mNumMeshes; ++n) {
+		unsigned int* faceArray;
+		const aiMesh* mesh = sc->mMeshes[n];
+		// Creo el array con un malloc (memory allocation)
+		// Reserva memoria y cuando termina la reserva me devuelve un puntero. Fuerzo que ese puntero sea un unsigned int
+		faceArray = (unsigned int*)malloc(sizeof(unsigned int) * mesh ->mNumFaces * 3); // *3 porque la cara es un triangulo
+		unsigned int faceIndex = 0;
+
+		float* vertexArray;
+		unsigned int vertexIndex = 0;
+
+		float* normalArray;
+		unsigned int normalIndex = 0;
+
+		float* textCoordsArray;
+
+		// Para rellenar los triángulos
+		if (mesh->HasFaces()) { //por defecto siempre tiene, pero no está de más chequear
+				for (unsigned int t = 0; t < mesh->mNumFaces; ++t) {
+					const aiFace* face = &mesh->mFaces[t];
+					memcpy(&faceArray[faceIndex], face->mIndices, 3 *
+						sizeof(unsigned int)); // Copio los bytes que me hacen falta
+					faceIndex += 3;
+				}
+		}
+
+		if (mesh->HasPositions()) { //Idem: por defecto siempre tiene.
+			vertexArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
+
+			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+				const aiVector3D* vertex = &mesh->mVertices[k];
+				memcpy(&vertexArray[vertexIndex], &float(vertex->x), sizeof(float));
+				memcpy(&vertexArray[vertexIndex + 1], &float(vertex->y), sizeof(float));
+				memcpy(&vertexArray[vertexIndex + 2], &float(vertex->z), sizeof(float));
+				vertexIndex += 3; // Strife (avance de 3)
+			}
+		}
+
+		if (mesh->HasNormals()) {
+			normalArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
+			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+				const aiVector3D* a_normal = &mesh->mNormals[k];
+				memcpy(&normalArray[normalIndex], &float(a_normal->x), sizeof(float));
+				memcpy(&normalArray[normalIndex + 1], &float(a_normal->y), sizeof(float));
+				memcpy(&normalArray[normalIndex + 2], &float(a_normal->z), sizeof(float));
+				normalIndex += 3;
+			}
+		}
+
+		objId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
+		glm::mat4 modelMatObjeto = glm::mat4(1.0f); //se crea una matriz de transformacion 4x4
+		modelMatObjeto = glm::scale(modelMatObjeto, glm::vec3(0.15f, 0.15f, 0.15f));   // Escalado del objeto
+		modelMatObjeto = glm::translate(modelMatObjeto, glm::vec3(2.5f, -6.8f, -2.0f)); // Posición
+		IGlib::setModelMat(outObjId, modelMatObjeto); //dibuja el objeto en la posicion y escalado que se le ha dado antes
+
 	}
 
 	return true;
