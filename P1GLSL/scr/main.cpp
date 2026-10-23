@@ -1,5 +1,6 @@
 #include "BOX.h"
 #include <IGL/IGlib.h>
+#include <vector>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -23,6 +24,14 @@ int objeto2Id = -1;
 
 // Variables assimp
 const aiScene* sc; 
+
+//Variables para movimiento de la luciérnaga
+std::vector<int> fireflyIds;
+float fireflyAngle = 0.0f;
+float fireflyRadius = 1.5f;
+
+glm::vec3 bikePos(-2.7f, -2.0f, -2.0f); //Posición de la moto para que la luciérnaga vuele a su alrededor
+
 
 //Variables para movimiento de la cámara
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Posición de la cámara en el espacio
@@ -92,7 +101,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", objeto2Id, 0.15f, glm::vec3(2.5f, -6.8f, -2.0f))) {
+	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", objeto2Id, 0.02f, glm::vec3(2.5f, -6.8f, -2.0f))) {
 		return -1;
 	}
 
@@ -138,6 +147,31 @@ void resizeFunc(int width, int height)
 
 void idleFunc()
 {
+
+	//std::cout << fireflyAngle << std::endl;
+	//Movimiento de la luciérnaga
+	fireflyAngle += 0.001f;
+
+	glm::vec3 fireflyPos;
+
+	fireflyPos.x = bikePos.x + cos(fireflyAngle) * fireflyRadius;
+	fireflyPos.z = bikePos.z + sin(fireflyAngle) * fireflyRadius;
+	
+
+	// Pequeño movimiento vertical para simular vuelo
+	fireflyPos.y = bikePos.y + 2.0f + sin(fireflyAngle * 3.0f) * 0.3f;
+
+	glm::mat4 modelMat = glm::mat4(1.0f);
+
+	modelMat = glm::translate(modelMat, fireflyPos);
+	modelMat = glm::scale(modelMat,
+		glm::vec3(0.02f));
+
+	for (int id : fireflyIds)
+	{
+		IGlib::setModelMat(id, modelMat);
+	}
+
 	/*static float angle = 0.0f;
 
 	angle = (angle < M_PI * 2.0) ? angle + 0.001 : 0.0f; // Si el ángulo es más de 60 grados, lo amplío, y sino reseteo 0.0. Hará que esté continuamente en rotación
@@ -413,7 +447,21 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 			}
 		}
 
-		outObjId = IGlib::createObj(mesh->mNumFaces, mesh->mNumVertices, faceArray, vertexArray, 0, normalArray);
+		int id = IGlib::createObj(
+			mesh->mNumFaces,
+			mesh->mNumVertices,
+			faceArray,
+			vertexArray,
+			0,
+			normalArray
+		);
+
+		if (pFile.find("Firefly") != std::string::npos)
+		{
+			fireflyIds.push_back(id);
+		}
+
+		outObjId = id;
 		glm::mat4 modelMatObjeto = glm::mat4(1.0f); //se crea una matriz de transformacion 4x4
 		modelMatObjeto = glm::scale(modelMatObjeto, glm::vec3(valorEscalado, valorEscalado, valorEscalado));   // Escalado del objeto
 		modelMatObjeto = glm::translate(modelMatObjeto, position); // Posición 
