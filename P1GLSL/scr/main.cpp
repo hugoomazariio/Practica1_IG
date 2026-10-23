@@ -22,6 +22,7 @@ int objId = -1;
 //creación de variables para los nuevos objetos a cargar en escena
 int objeto1Id = -1;
 int objeto2Id = -1;
+int objeto3Id = -1;
 
 // Variables assimp
 const aiScene* sc; 
@@ -138,6 +139,9 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", objeto3Id, 0.5f, glm::vec3(-1.5f, -2.0f, -2.0f))) {
+		return -1;
+	}
 
 	//Creamos el objeto que vamos a visualizar
 	// Cuando se crea un objeto en OpenGL se crea un ID, este ID hay que conservarlo para luego operaciones que se hagan 
