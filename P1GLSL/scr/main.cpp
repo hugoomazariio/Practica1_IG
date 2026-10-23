@@ -62,14 +62,16 @@ struct Modelo {
 	std::vector<int> ids; //IDs de las mallas (los que devuelve createObj)
 	glm::vec3 posicion; //Dónde está el modelo en el mundo
 	glm::vec3 escala; //Escala en cada eje
+	glm::mat4 rotacion; // Rotación acumulado del modelo (matriz 4x4)
 	float escalaInicial; //Escala con la que se cargó el modelo (para el reset con R)
 	glm::vec3 boundsMin, boundsMax; //Caja que rodea al modelo (en coordenadas del propio modelo), para detectar el clic
 };
 std::vector<Modelo> modelos; //Todos los modelos de la escena
 int seleccionado = -1; //Índice del modelo seleccionado (-1 = ninguno)
 bool modoEscalado = false; //Se activa con la tecla 1
+bool modoRotacion = false; // Se activa con la tecla 2
 int indiceLuciernaga = -1; //Índice (en "modelos") de la luciérnaga, que se mueve sola en idleFunc
-int ejeEscalado = 0; //0 = los tres ejes, 1 = X, 2 = Y, 3 = Z
+int ejeEscalado = 0; //Eje de escalado y de rotación: 0 = los tres ejes (en rotación, 0 = eje Y), 1 = X, 2 = Y, 3 = Z
 
 glm::mat4 viewMat = glm::mat4(1.0f); //Copia de la matriz de vista (se necesita para saber qué objeto hay bajo el ratón)
 glm::mat4 projMat = glm::mat4(1.0f); //Copia de la matriz de proyección
@@ -98,6 +100,7 @@ void actualizarModelo(const Modelo& m); //Envía la matriz de modelo a todas las
 void seleccionarObjeto(int mx, int my); //Selecciona el modelo que haya bajo el ratón
 bool teclaEditor(unsigned char key); //Gestiona las teclas del editor (devuelve true si ha usado la tecla)
 void escalarSeleccionado(float factor); //Multiplica la escala del modelo seleccionado
+void rotarSeleccionado(float grados); //Gira el modelo seleccionado alrededor del eje elegido
 bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t); //Intersección rayo-caja
 
 ///////////////////////////////////////////////////
@@ -513,6 +516,7 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 	//Para que los objetos queden donde estaban, multiplicamos la posición por la escala y usamos traslación * escalado 
 	modelo.posicion = position * valorEscalado;
 	modelo.escala = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
+	modelo.rotacion = glm::mat4(1.0f); //Sin rotación al cargar
 	modelo.escalaInicial = valorEscalado;
 	if (pFile.find("Firefly") != std::string::npos)
 		indiceLuciernaga = (int)modelos.size(); //Guardamos cuál es la luciérnaga (su posición la mueve idleFunc)
@@ -527,6 +531,7 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 
 glm::mat4 matrizModelo(const Modelo& m) {
 	glm::mat4 mat = glm::translate(glm::mat4(1.0f), m.posicion); // Primero la traslación
+	mat = mat * m.rotacion; // luego la rotación
 	mat = glm::scale(mat, m.escala); // y el escalado se aplica sobre los ejes del propio objeto
 	return mat;
 }
@@ -565,10 +570,11 @@ void seleccionarObjeto(int mx, int my) {
 	ejeEscalado = 0;
 	if (seleccionado < 0) {
 		modoEscalado = false;
+		modoRotacion = false;
 		std::cout << "Nada seleccionado" << std::endl;
 	}
 	else {
-		std::cout << "Seleccionado el modelo " << seleccionado << " (pulsa 1 para escalar)" << std::endl;
+		std::cout << "Seleccionado el modelo " << seleccionado << " (pulsa 1 para escalar o 2 para rotar)" << std::endl;
 	}
 }
 
@@ -576,33 +582,54 @@ bool teclaEditor(unsigned char key) {
 	if (key == '1') { //Activa el modo escalado
 		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
 		modoEscalado = true;
+		modoRotacion = false;
+		ejeEscalado = 0; //Al escalar, por defecto se escalan los tres ejes
 		std::cout << "Modo escalado: + y - para cambiar el tamaño, X/Y/Z para elegir eje, R para resetear" << std::endl;
+		return true;
+	}
+
+	if (key == '2') { //Activa el modo rotación
+		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
+		modoRotacion = true;
+		modoEscalado = false;
+		if (ejeEscalado == 0) ejeEscalado = 2; //Al rotar, por defecto se gira sobre el eje Y
+		std::cout << "Modo rotacion: + y - para girar, X/Y/Z para elegir eje, R para resetear" << std::endl;
 		return true;
 	}
 
 	if (key == 'x' || key == 'X' || key == 'y' || key == 'Y' || key == 'z' || key == 'Z') { //Elegir el eje
 		if (seleccionado < 0) return true;
 		int eje = (key == 'x' || key == 'X') ? 1 : ((key == 'y' || key == 'Y') ? 2 : 3);
-		ejeEscalado = (ejeEscalado == eje) ? 0 : eje; //Pulsar el mismo eje otra vez vuelve a los tres
+		if (modoRotacion)
+			ejeEscalado = eje; //Al rotar siempre hace falta un eje concreto
+		else
+			ejeEscalado = (ejeEscalado == eje) ? 0 : eje; //Al escalar, pulsar el mismo eje otra vez vuelve a los tres
 		const char* nombres[] = { "XYZ", "X", "Y", "Z" };
-		std::cout << "Eje de escalado: " << nombres[ejeEscalado] << std::endl;
+		std::cout << "Eje: " << nombres[ejeEscalado] << std::endl;
 		return true;
 	}
 
-	if (key == '+' || key == '=') { //Agrandar (el '=' es la misma tecla que '+' sin pulsar mayúsculas)
-		if (modoEscalado && seleccionado >= 0) escalarSeleccionado(1.1f);
+	if (key == '+' || key == '=') { //Agrandar o girar en un sentido (el '=' es la misma tecla que '+' sin pulsar mayúsculas)
+		if (seleccionado >= 0 && modoEscalado) escalarSeleccionado(1.1f);
+		if (seleccionado >= 0 && modoRotacion) rotarSeleccionado(5.0f);
 		return true;
 	}
 
-	if (key == '-' || key == '_') { //Reducir
-		if (modoEscalado && seleccionado >= 0) escalarSeleccionado(1.0f / 1.1f);
+	if (key == '-' || key == '_') { //Reducir o girar en sentido contrario
+		if (seleccionado >= 0 && modoEscalado) escalarSeleccionado(1.0f / 1.1f);
+		if (seleccionado >= 0 && modoRotacion) rotarSeleccionado(-5.0f);
 		return true;
 	}
 
-	if (key == 'r' || key == 'R') { //Volver a la escala original (la de la carga del modelo)
+	if (key == 'r' || key == 'R') { //Volver al valor original de lo que se está editando
 		if (seleccionado < 0) return true;
-		float original = modelos[seleccionado].escalaInicial;
-		modelos[seleccionado].escala = glm::vec3(original);
+		if (modoRotacion) {
+			modelos[seleccionado].rotacion = glm::mat4(1.0f); //Sin rotación
+		}
+		else {
+			float original = modelos[seleccionado].escalaInicial; //Escala con la que se cargó el modelo
+			modelos[seleccionado].escala = glm::vec3(original);
+		}
 		actualizarModelo(modelos[seleccionado]);
 		return true;
 	}
@@ -619,6 +646,18 @@ void escalarSeleccionado(float factor) {
 	if (ejeEscalado == 0 || ejeEscalado == 3) e.z = glm::clamp(e.z * factor, minimo, maximo);
 	actualizarModelo(modelos[seleccionado]);
 	std::cout << "Escala: (" << e.x << ", " << e.y << ", " << e.z << ")" << std::endl;
+}
+
+void rotarSeleccionado(float grados) {
+	glm::vec3 eje(0.0f, 1.0f, 0.0f); //Por defecto, eje Y
+	if (ejeEscalado == 1) eje = glm::vec3(1.0f, 0.0f, 0.0f);
+	if (ejeEscalado == 3) eje = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	//Acumulamos el giro sobre los ejes del propio objeto (multiplicando por la derecha), igual que el escalado
+	glm::mat4 giro = glm::rotate(glm::mat4(1.0f), glm::radians(grados), eje);
+	modelos[seleccionado].rotacion = modelos[seleccionado].rotacion * giro;
+	actualizarModelo(modelos[seleccionado]);
+	std::cout << "Rotado " << grados << " grados" << std::endl;
 }
 
 //Intersección entre el rayo (o + t*d, con t entre 0 y 1) y una caja alineada con los ejes
