@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <cfloat>
 #define M_PI 3.14159265
 
 // Assimp library
@@ -55,6 +56,25 @@ glm::vec3 upCam; //Vector que apunta arriba de la cámara
 float fov = 60.0f; //Ángulo inicial de visión
 float aspectRatio = 1.0f; //Proporción de la ventana (ancho-alto)
 
+//Variables para seleccionar y escalar objetos
+//Un modelo cargado puede tener varias mallas (una por material), así que se guardan todas juntas
+struct Modelo {
+	std::vector<int> ids; //IDs de las mallas (los que devuelve createObj)
+	glm::vec3 posicion; //Dónde está el modelo en el mundo
+	glm::vec3 escala; //Escala en cada eje
+	float escalaInicial; //Escala con la que se cargó el modelo (para el reset con R)
+	glm::vec3 boundsMin, boundsMax; //Caja que rodea al modelo (en coordenadas del propio modelo), para detectar el clic
+};
+std::vector<Modelo> modelos; //Todos los modelos de la escena
+int seleccionado = -1; //Índice del modelo seleccionado (-1 = ninguno)
+bool modoEscalado = false; //Se activa con la tecla 1
+int indiceLuciernaga = -1; //Índice (en "modelos") de la luciérnaga, que se mueve sola en idleFunc
+int ejeEscalado = 0; //0 = los tres ejes, 1 = X, 2 = Y, 3 = Z
+
+glm::mat4 viewMat = glm::mat4(1.0f); //Copia de la matriz de vista (se necesita para saber qué objeto hay bajo el ratón)
+glm::mat4 projMat = glm::mat4(1.0f); //Copia de la matriz de proyección
+int anchoVentana = 500; //Tamaño de la ventana en píxeles
+int altoVentana = 500;
 
 ////////////////////////////////////////////////
 //Declaraci�n de CB
@@ -72,6 +92,13 @@ glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up); //Para cr
 
 void updateProjectionMatrix(); //Para actualizar los datos de la matriz de proyección (Zoom)
 
+//Selección y escalado de objetos
+glm::mat4 matrizModelo(const Modelo& m); //Matriz de modelo = traslación * escala
+void actualizarModelo(const Modelo& m); //Envía la matriz de modelo a todas las mallas del modelo
+void seleccionarObjeto(int mx, int my); //Selecciona el modelo que haya bajo el ratón
+bool teclaEditor(unsigned char key); //Gestiona las teclas del editor (devuelve true si ha usado la tecla)
+void escalarSeleccionado(float factor); //Multiplica la escala del modelo seleccionado
+bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t); //Intersección rayo-caja
 
 ///////////////////////////////////////////////////
 // Carga de objetos
@@ -142,6 +169,8 @@ void resizeFunc(int width, int height)
 		height = 1; //Para evitar divisiones entre 0
 
 	aspectRatio = (float)width / (float)height; //Para guardar el ratio de la cámara (matriz de proyección)
+	anchoVentana = width; //Guardamos el tamaño de la ventana para convertir el clic en un rayo
+	altoVentana = height;
 	updateProjectionMatrix();
 }
 
@@ -161,15 +190,10 @@ void idleFunc()
 	// Pequeño movimiento vertical para simular vuelo
 	fireflyPos.y = bikePos.y + 2.0f + sin(fireflyAngle * 3.0f) * 0.3f;
 
-	glm::mat4 modelMat = glm::mat4(1.0f);
-
-	modelMat = glm::translate(modelMat, fireflyPos);
-	modelMat = glm::scale(modelMat,
-		glm::vec3(0.02f));
-
-	for (int id : fireflyIds)
-	{
-		IGlib::setModelMat(id, modelMat);
+	//La posición la mueve la órbita, pero la escala la controla el editor (así se puede escalar la luciérnaga con el teclado)
+	if (indiceLuciernaga >= 0) {
+		modelos[indiceLuciernaga].posicion = fireflyPos;
+		actualizarModelo(modelos[indiceLuciernaga]);
 	}
 
 	/*static float angle = 0.0f;
@@ -184,6 +208,11 @@ void idleFunc()
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
+	//Teclas del editor (1, +, -, X, Y, Z, R): si el editor usa la tecla, no se la pasamos a la cámara
+	if (teclaEditor(key)) {
+		return;
+	}
+
 	//MOVIMIENTO DE LA CÁMARA MEDIANTE TECLADO
 	float cameraSpeed = 0.5f; //Distancia que sumamos o restamos para mover la cámara
 	float rotationSpeed = 5.0f; //Ángulo que sumamos o restamos para girar la cámara
@@ -237,12 +266,14 @@ void keyboardFunc(unsigned char key, int x, int y)
 
 void mouseFunc(int button, int state, int x, int y)
 {
-	if (button == 2) { //Clic derecho
-		rightClicPressed = true;
+	if (button == 2) { //Clic derecho: solo está pulsado entre el botón abajo (state 0) y arriba (state 1)
+		rightClicPressed = (state == 0);
 		firstMouse = true;
 	}
-	else {
-		rightClicPressed = false;
+
+	//Clic izquierdo (botón 0) al pulsar: seleccionamos el objeto que haya bajo el ratón
+	if (button == 0 && state == 0) {
+		seleccionarObjeto(x, y);
 	}
 }
 
@@ -328,6 +359,7 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 void updateCameraVectors() {
 	glm::mat4 view = lookAtMatrix(cameraPos, targetPos, upVector);
 	IGlib::setViewMat(view);
+	viewMat = view; //Guardamos la vista para el picking
 }
 
 glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up) {
@@ -376,6 +408,7 @@ void updateProjectionMatrix() {
 	proj[3].w = 0.0;
 
 	IGlib::setProjMat(proj);
+	projMat = proj; //Guardamos la proyección para el picking
 }
 
 
@@ -396,6 +429,11 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 		return false;
 	}
 	std::cout << "Se han cargado " << sc->mNumMeshes << " meshes" << std::endl;
+
+	// Un modelo puede tener varias mallas (una por material): las agrupamos para escalarlas y seleccionarlas juntas
+	Modelo modelo;
+	modelo.boundsMin = glm::vec3(FLT_MAX);
+	modelo.boundsMax = glm::vec3(-FLT_MAX);
 
 	// bucle de carga 
 	for (unsigned int n = 0; n < sc->mNumMeshes; ++n) {
@@ -462,13 +500,144 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 		}
 
 		outObjId = id;
-		glm::mat4 modelMatObjeto = glm::mat4(1.0f); //se crea una matriz de transformacion 4x4
-		modelMatObjeto = glm::scale(modelMatObjeto, glm::vec3(valorEscalado, valorEscalado, valorEscalado));   // Escalado del objeto
-		modelMatObjeto = glm::translate(modelMatObjeto, position); // Posición 
-		IGlib::setModelMat(outObjId, modelMatObjeto); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
+		modelo.ids.push_back(id); //Guardamos el ID de cada malla
 
+		//Ampliamos la caja del modelo con los vértices de esta malla
+		for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+			glm::vec3 v(vertexArray[3 * k], vertexArray[3 * k + 1], vertexArray[3 * k + 2]);
+			modelo.boundsMin = glm::min(modelo.boundsMin, v);
+			modelo.boundsMax = glm::max(modelo.boundsMax, v);
+		}
 	}
 
+	//Para que los objetos queden donde estaban, multiplicamos la posición por la escala y usamos traslación * escalado 
+	modelo.posicion = position * valorEscalado;
+	modelo.escala = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
+	modelo.escalaInicial = valorEscalado;
+	if (pFile.find("Firefly") != std::string::npos)
+		indiceLuciernaga = (int)modelos.size(); //Guardamos cuál es la luciérnaga (su posición la mueve idleFunc)
+	modelos.push_back(modelo);
+	actualizarModelo(modelo); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
+
+	return true;
+}
+
+
+// ---------------------- Selección y escalado de objetos ---------------------- 
+
+glm::mat4 matrizModelo(const Modelo& m) {
+	glm::mat4 mat = glm::translate(glm::mat4(1.0f), m.posicion); // Primero la traslación
+	mat = glm::scale(mat, m.escala); // y el escalado se aplica sobre los ejes del propio objeto
+	return mat;
+}
+
+void actualizarModelo(const Modelo& m) {
+	glm::mat4 mat = matrizModelo(m);
+	for (size_t i = 0; i < m.ids.size(); ++i) //Todas las mallas del modelo comparten la misma matriz
+		IGlib::setModelMat(m.ids[i], mat);
+}
+
+void seleccionarObjeto(int mx, int my) {
+	//Convertimos el pixel del clic en un rayo: píxeles -> coordenadas de -1 a 1 -> mundo (deshaciendo proyección y vista)
+	float nx = 2.0f * mx / anchoVentana - 1.0f;
+	float ny = 1.0f - 2.0f * my / altoVentana; //En la ventana Y crece hacia abajo, en OpenGL hacia arriba
+	glm::mat4 inversa = glm::inverse(projMat * viewMat);
+	glm::vec4 cercano = inversa * glm::vec4(nx, ny, -1.0f, 1.0f); //Punto del rayo en el plano near
+	glm::vec4 lejano = inversa * glm::vec4(nx, ny, 1.0f, 1.0f); //Punto del rayo en el plano far
+	glm::vec3 origen = glm::vec3(cercano) / cercano.w;
+	glm::vec3 dir = glm::vec3(lejano) / lejano.w - origen; //Sin normalizar: t = 0 en near y t = 1 en far
+
+	int elegido = -1;
+	float mejorT = 2.0f;
+	for (size_t i = 0; i < modelos.size(); ++i) {
+		//Pasamos el rayo al espacio del propio modelo: así la caja siempre está alineada con los ejes, aunque el modelo esté escalado
+		glm::mat4 inv = glm::inverse(matrizModelo(modelos[i]));
+		glm::vec3 oLocal = glm::vec3(inv * glm::vec4(origen, 1.0f));
+		glm::vec3 dLocal = glm::vec3(inv * glm::vec4(dir, 0.0f));
+		float t;
+		if (rayoCaja(oLocal, dLocal, modelos[i].boundsMin, modelos[i].boundsMax, t) && t < mejorT) {
+			mejorT = t; //Nos quedamos con el modelo más cercano a la cámara
+			elegido = (int)i;
+		}
+	}
+
+	seleccionado = elegido;
+	ejeEscalado = 0;
+	if (seleccionado < 0) {
+		modoEscalado = false;
+		std::cout << "Nada seleccionado" << std::endl;
+	}
+	else {
+		std::cout << "Seleccionado el modelo " << seleccionado << " (pulsa 1 para escalar)" << std::endl;
+	}
+}
+
+bool teclaEditor(unsigned char key) {
+	if (key == '1') { //Activa el modo escalado
+		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
+		modoEscalado = true;
+		std::cout << "Modo escalado: + y - para cambiar el tamaño, X/Y/Z para elegir eje, R para resetear" << std::endl;
+		return true;
+	}
+
+	if (key == 'x' || key == 'X' || key == 'y' || key == 'Y' || key == 'z' || key == 'Z') { //Elegir el eje
+		if (seleccionado < 0) return true;
+		int eje = (key == 'x' || key == 'X') ? 1 : ((key == 'y' || key == 'Y') ? 2 : 3);
+		ejeEscalado = (ejeEscalado == eje) ? 0 : eje; //Pulsar el mismo eje otra vez vuelve a los tres
+		const char* nombres[] = { "XYZ", "X", "Y", "Z" };
+		std::cout << "Eje de escalado: " << nombres[ejeEscalado] << std::endl;
+		return true;
+	}
+
+	if (key == '+' || key == '=') { //Agrandar (el '=' es la misma tecla que '+' sin pulsar mayúsculas)
+		if (modoEscalado && seleccionado >= 0) escalarSeleccionado(1.1f);
+		return true;
+	}
+
+	if (key == '-' || key == '_') { //Reducir
+		if (modoEscalado && seleccionado >= 0) escalarSeleccionado(1.0f / 1.1f);
+		return true;
+	}
+
+	if (key == 'r' || key == 'R') { //Volver a la escala original (la de la carga del modelo)
+		if (seleccionado < 0) return true;
+		float original = modelos[seleccionado].escalaInicial;
+		modelos[seleccionado].escala = glm::vec3(original);
+		actualizarModelo(modelos[seleccionado]);
+		return true;
+	}
+
+	return false; //No es una tecla del editor: la usa la cámara
+}
+
+void escalarSeleccionado(float factor) {
+	float minimo = modelos[seleccionado].escalaInicial / 20.0f; //Límites relativos a la escala de carga: entre 1/20 y 20 veces,
+	float maximo = modelos[seleccionado].escalaInicial * 20.0f; //para que el objeto no desaparezca ni sea gigante
+	glm::vec3& e = modelos[seleccionado].escala;
+	if (ejeEscalado == 0 || ejeEscalado == 1) e.x = glm::clamp(e.x * factor, minimo, maximo);
+	if (ejeEscalado == 0 || ejeEscalado == 2) e.y = glm::clamp(e.y * factor, minimo, maximo);
+	if (ejeEscalado == 0 || ejeEscalado == 3) e.z = glm::clamp(e.z * factor, minimo, maximo);
+	actualizarModelo(modelos[seleccionado]);
+	std::cout << "Escala: (" << e.x << ", " << e.y << ", " << e.z << ")" << std::endl;
+}
+
+//Intersección entre el rayo (o + t*d, con t entre 0 y 1) y una caja alineada con los ejes
+bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t) {
+	float tmin = 0.0f, tmax = 1.0f;
+	for (int i = 0; i < 3; ++i) { //Un par de planos por cada eje
+		if (fabs(d[i]) < 1e-8f) {
+			if (o[i] < bmin[i] || o[i] > bmax[i]) return false; //Rayo paralelo a los planos y fuera de ellos
+		}
+		else {
+			float t1 = (bmin[i] - o[i]) / d[i];
+			float t2 = (bmax[i] - o[i]) / d[i];
+			if (t1 > t2) { float aux = t1; t1 = t2; t2 = aux; }
+			if (t1 > tmin) tmin = t1;
+			if (t2 < tmax) tmax = t2;
+			if (tmin > tmax) return false; //Los intervalos no se solapan: el rayo no toca la caja
+		}
+	}
+	t = tmin;
 	return true;
 }
 
