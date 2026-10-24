@@ -20,7 +20,7 @@
 int objId = -1;
 
 // Variables assimp
-const aiScene* sc; 
+const aiScene* sc;
 
 //Variables para movimiento de la luciérnaga
 float fireflyAngle = 0.0f;
@@ -104,16 +104,16 @@ void trasladarSeleccionado(float distancia); //Mueve el modelo seleccionado sobr
 bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t); //Intersección rayo-caja
 
 // Carga de objetos
-bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position);
+bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, const std::string& colorTex);
 
 
 // ---------------------- Método main ---------------------- 
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v9.vert", "../shaders_P1/shader.v9.frag")) 
+	if (!IGlib::init("../shaders_P1/shader.v10.vert", "../shaders_P1/shader.v10.frag"))
 		return -1;
-	
+
 	//Matriz de proyección
 	updateProjectionMatrix();
 
@@ -123,18 +123,18 @@ int main(int argc, char** argv)
 	upCam = glm::normalize(glm::cross(rightCam, frontCam)); //Vector hacia arriba (eje Y)
 
 	updateCameraVectors();
-	
+
 
 	//Se pasa el .obj de los objetos que se quieren cargar, y si no se encuenta devuelve -1
 	glm::vec3 posicionMoto = glm::vec3(0.0f, 0.0f, 0.0f);
-	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto)) return -1;
+	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto, "../3D_assets/Bike/Bike_Textures/Bike_D.png")) return -1;
 	glm::vec3 bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
 
-	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -3.0f, 0.0f))) return -1;
+	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -3.0f, 0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png")) return -1;
 	indiceLuciernaga = modelos.size() - 1; // El último modelo añadido a la lista es la luciérnaga
 
-	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 0.5f, glm::vec3(1.0f, 0.0f, -0.5f))) return -1;
-	
+	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 0.5f, glm::vec3(1.0f, 0.0f, -0.5f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg")) return -1;
+
 
 	// CBs (Callbacks)
 	// Cada vez que el sistema detecte que el usuario ha rescalado la pantalla, hecho click, etc. Recoge los eventos y nos avisa
@@ -175,7 +175,7 @@ void idleFunc()
 
 	fireflyPos.x = bikePos.x + cos(fireflyAngle) * fireflyRadius;
 	fireflyPos.z = bikePos.z + sin(fireflyAngle) * fireflyRadius;
-	
+
 
 	// Pequeño movimiento vertical para simular vuelo
 	fireflyPos.y = bikePos.y + 2.0f + sin(fireflyAngle * 3.0f) * 0.3f;
@@ -325,7 +325,8 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 
 	if (dir > 0) {
 		fov -= zoomSpeed; //Si vamos hacia arriba, el fov se disminuye (más cerca)
-	} else {
+	}
+	else {
 		fov += zoomSpeed; //Si va hacia abajo, el fov aumenta (más lejos)
 	}
 
@@ -380,10 +381,10 @@ void updateProjectionMatrix() {
 	glm::mat4 proj = glm::mat4(1.0);
 
 	float f = 1.0f / tan(glm::radians(fov) / 2.0); // Convertimos el fov a radianes y sacamos la tagente de la mitad
-	float far = 20.0; 
-	float near = 0.1; 
+	float far = 20.0;
+	float near = 0.1;
 
-	proj[0].x = f/aspectRatio; 
+	proj[0].x = f / aspectRatio;
 	proj[1].y = f;
 	proj[2].z = (far + near) / (near - far);
 	proj[2].w = -1.0;
@@ -397,13 +398,13 @@ void updateProjectionMatrix() {
 
 // ---------------------- Carga de objetos ---------------------- 
 
-bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position) { 
-	
+bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, const std::string& colorTex) {
+
 	Assimp::Importer importer;
-	sc = importer.ReadFile(pFile, 
+	sc = importer.ReadFile(pFile,
 		aiProcess_CalcTangentSpace |
-		aiProcess_Triangulate | 
-		aiProcess_JoinIdenticalVertices | 
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
 		aiProcess_SortByPType);
 
 	// Si falla import dime algo
@@ -420,14 +421,14 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 
 	// bucle de carga 
 	for (unsigned int n = 0; n < sc->mNumMeshes; ++n) {
-		unsigned int* faceArray; 
+		unsigned int* faceArray;
 		const aiMesh* mesh = sc->mMeshes[n];
 		// Creo el array con un malloc (memory allocation)
 		// Reserva memoria y cuando termina la reserva me devuelve un puntero. Fuerzo que ese puntero sea un unsigned int
-		faceArray = (unsigned int*)malloc(sizeof(unsigned int) * mesh ->mNumFaces * 3); // *3 porque la cara es un triangulo
+		faceArray = (unsigned int*)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3); // *3 porque la cara es un triangulo
 		unsigned int faceIndex = 0;
 
-		float* vertexArray; 
+		float* vertexArray;
 		unsigned int vertexIndex = 0;
 
 		float* normalArray;
@@ -437,14 +438,14 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 
 		// Para rellenar los triángulos
 		if (mesh->HasFaces()) { //por defecto siempre tiene, pero no está de más chequear
-				for (unsigned int t = 0; t < mesh->mNumFaces; ++t) {
-					const aiFace* face = &mesh->mFaces[t];
-					memcpy(&faceArray[faceIndex], face->mIndices, 3 *
-						sizeof(unsigned int)); // Copio los bytes que me hacen falta
-					faceIndex += 3;
-				}
+			for (unsigned int t = 0; t < mesh->mNumFaces; ++t) {
+				const aiFace* face = &mesh->mFaces[t];
+				memcpy(&faceArray[faceIndex], face->mIndices, 3 *
+					sizeof(unsigned int)); // Copio los bytes que me hacen falta
+				faceIndex += 3;
+			}
 		}
-		
+
 		if (mesh->HasPositions()) { //Idem: por defecto siempre tiene.
 			vertexArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
 
@@ -468,14 +469,26 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			}
 		}
 
+		//Coordenadas de textura: 2 valores (u, v) por vértice. Solo usamos el primer juego (el 0)
+		float* texCoordArray = NULL;
+		if (mesh->HasTextureCoords(0)) {
+			texCoordArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 2);
+			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+				texCoordArray[2 * k] = mesh->mTextureCoords[0][k].x;
+				texCoordArray[2 * k + 1] = mesh->mTextureCoords[0][k].y;
+			}
+		}
+
 		int id = IGlib::createObj(
 			mesh->mNumFaces,
 			mesh->mNumVertices,
 			faceArray,
 			vertexArray,
 			0,
-			normalArray
+			normalArray,
+			texCoordArray
 		);
+		IGlib::addColorTex(id, colorTex.c_str()); //Textura de color (difusa) de todas las mallas del modelo
 
 		/*
 		if (pFile.find("Firefly") != std::string::npos)
@@ -501,7 +514,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 	modelo.escala = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
 	modelo.rotacion = glm::mat4(1.0f); //Sin rotación al cargar
 	modelo.escalaInicial = valorEscalado;
-	
+
 	/*if (pFile.find("Firefly") != std::string::npos)
 		indiceLuciernaga = (int)modelos.size(); //Guardamos cuál es la luciérnaga (su posición la mueve idleFunc)
 		*/
@@ -699,4 +712,3 @@ bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t
 	t = tmin;
 	return true;
 }
-

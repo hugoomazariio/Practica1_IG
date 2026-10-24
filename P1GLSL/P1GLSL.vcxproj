@@ -30,6 +30,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\P2GLSL\P2\shaders_P2\shader.v10.frag" />
+    <None Include="..\..\P2GLSL\P2\shaders_P2\shader.v10.vert" />
     <None Include="..\shaders_P1\shader.v0.frag" />
     <None Include="..\shaders_P1\shader.v0.vert" />
     <None Include="..\shaders_P1\shader.v1.frag" />
