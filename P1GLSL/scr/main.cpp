@@ -10,7 +10,7 @@
 #define M_PI 3.14159265
 
 // Assimp library
-#include <assimp/Importer.hpp>  // Esto sirve para la importación de ficheros
+#include <assimp/Importer.hpp>  // Para la importación de ficheros
 #include <assimp/scene.h> // Estructura de la escena
 #include <assimp/postprocess.h> // Flags de procesado
 
@@ -19,46 +19,40 @@
 //Idenficadores de los objetos de la escena
 int objId = -1;
 
-//creación de variables para los nuevos objetos a cargar en escena
-int objeto1Id = -1;
-int objeto2Id = -1;
-int objeto3Id = -1;
-
 // Variables assimp
 const aiScene* sc; 
 
 //Variables para movimiento de la luciérnaga
-std::vector<int> fireflyIds;
 float fireflyAngle = 0.0f;
 float fireflyRadius = 1.5f;
 
-glm::vec3 bikePos(-2.7f, -2.0f, -2.0f); //Posición de la moto para que la luciérnaga vuele a su alrededor
+glm::vec3 bikePos; //Posición de la moto para que la luciérnaga vuele a su alrededor
 
 
-//Variables para movimiento de la cámara
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Posición de la cámara en el espacio
+// Variables para movimiento de la cámara
+glm::vec3 cameraPos = glm::vec3(0.0f, 1.5f, 4.0f); // Posición de la cámara en el espacio
 glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cámara
 glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); //Vector hacia arriba (eje Y positivo)
 
 float angHor = -90.0f; //Ángulo inicial de la cámara (horizontal). Comenzamos en -90 para que la cámara comience mirando hacia delante 
 float angVert = 0.0f; //Ángulo inicial de la cámara (vertical)
 
-//Variables para controlar el movimiento del ratón
+glm::vec3 frontCam; //Vector que apunta delante de la cámara
+glm::vec3 rightCam; //Vector que apunta a la derecha de la cámara
+glm::vec3 upCam; //Vector que apunta arriba de la cámara
+
+// Variables para controlar el movimiento del ratón
 float lastX = 400.0f;
 float lastY = 300.0f;
 bool firstMouse = true; // Nos ayuda a reducir saltos incómodos al mover la cámara
 bool rightClicPressed; // Detecta si se está pulsando el clic derecho para el movimiento de cámara
 
-glm::vec3 frontCam; //Vector que apunta delante de la cámara
-glm::vec3 rightCam; //Vector que apunta a la derecha de la cámara
-glm::vec3 upCam; //Vector que apunta arriba de la cámara
-
-//Variables para zoom 
+// Variables para zoom 
 float fov = 60.0f; //Ángulo inicial de visión
-float aspectRatio = 1.0f; //Proporción de la ventana (ancho-alto)
+float aspectRatio; //Proporción de la ventana (ancho-alto)
 
-//Variables para seleccionar y escalar objetos
-//Un modelo cargado puede tener varias mallas (una por material), así que se guardan todas juntas
+// Variables para seleccionar y escalar objetos
+// Un modelo cargado puede tener varias mallas (una por material), así que se guardan todas juntas
 struct Modelo {
 	std::vector<int> ids; //IDs de las mallas (los que devuelve createObj)
 	glm::vec3 posicion; //Dónde está el modelo en el mundo
@@ -68,6 +62,7 @@ struct Modelo {
 	glm::vec3 posicionInicial; //Posición con la que se cargó el modelo (para el reset con R)
 	glm::vec3 boundsMin, boundsMax; //Caja que rodea al modelo (en coordenadas del propio modelo), para detectar el clic
 };
+
 std::vector<Modelo> modelos; //Todos los modelos de la escena
 int seleccionado = -1; //Índice del modelo seleccionado (-1 = ninguno)
 bool modoEscalado = false; //Se activa con la tecla 1
@@ -78,8 +73,9 @@ int ejeEscalado = 0; //Eje de escalado y de rotación: 0 = los tres ejes (en rot
 
 glm::mat4 viewMat = glm::mat4(1.0f); //Copia de la matriz de vista (se necesita para saber qué objeto hay bajo el ratón)
 glm::mat4 projMat = glm::mat4(1.0f); //Copia de la matriz de proyección
-int anchoVentana = 500; //Tamaño de la ventana en píxeles
-int altoVentana = 500;
+
+int anchoVentana; //Tamaño de la ventana en píxeles
+int altoVentana;
 
 ////////////////////////////////////////////////
 //Declaraci�n de CB
@@ -107,10 +103,8 @@ void rotarSeleccionado(float grados); //Gira el modelo seleccionado alrededor de
 void trasladarSeleccionado(float distancia); //Mueve el modelo seleccionado sobre el eje elegido
 bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t); //Intersección rayo-caja
 
-///////////////////////////////////////////////////
 // Carga de objetos
-bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscalado, glm::vec3 position);
-
+bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position);
 
 
 // ---------------------- Método main ---------------------- 
@@ -130,29 +124,17 @@ int main(int argc, char** argv)
 
 	updateCameraVectors();
 	
-	//se pasa el .obj de los objetos que se quieren cargar si no se encuenta devuelve -1
-	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", objeto1Id, 0.5f, glm::vec3(-2.7f,-2.0f,-2.0f))) {
-		return -1;
-	}
 
-	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", objeto2Id, 0.02f, glm::vec3(2.5f, -6.8f, -2.0f))) {
-		return -1;
-	}
+	//Se pasa el .obj de los objetos que se quieren cargar, y si no se encuenta devuelve -1
+	glm::vec3 posicionMoto = glm::vec3(0.0f, 0.0f, 0.0f);
+	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto)) return -1;
+	glm::vec3 bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
 
-	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", objeto3Id, 0.5f, glm::vec3(-1.5f, -2.0f, -2.0f))) {
-		return -1;
-	}
+	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -3.0f, 0.0f))) return -1;
+	indiceLuciernaga = modelos.size() - 1; // El último modelo añadido a la lista es la luciérnaga
 
-	//Creamos el objeto que vamos a visualizar
-	// Cuando se crea un objeto en OpenGL se crea un ID, este ID hay que conservarlo para luego operaciones que se hagan 
-	//objId = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex, cubeVertexPos, cubeVertexColor, cubeVertexNormal, cubeVertexTexCoord, cubeVertexTangent); 
-	// Cada vez que creemos un objeto, tenemos que guardar ese ID
-
-	//glm::mat4 modelMat = glm::mat4(1.0f);
-	//IGlib::setModelMat(objId, modelMat); // Te dice, dime el id y la matriz
-	//Incluir texturas aqu�.
-	//IGlib::addColorTex(objId, "../img/color.png");
-
+	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 0.5f, glm::vec3(1.0f, 0.0f, -0.5f))) return -1;
+	
 
 	// CBs (Callbacks)
 	// Cada vez que el sistema detecte que el usuario ha rescalado la pantalla, hecho click, etc. Recoge los eventos y nos avisa
@@ -186,8 +168,6 @@ void resizeFunc(int width, int height)
 
 void idleFunc()
 {
-
-	//std::cout << fireflyAngle << std::endl;
 	//Movimiento de la luciérnaga
 	fireflyAngle += 0.001f;
 
@@ -206,19 +186,12 @@ void idleFunc()
 		actualizarModelo(modelos[indiceLuciernaga]);
 	}
 
-	/*static float angle = 0.0f;
-
-	angle = (angle < M_PI * 2.0) ? angle + 0.001 : 0.0f; // Si el ángulo es más de 60 grados, lo amplío, y sino reseteo 0.0. Hará que esté continuamente en rotación
-
-	glm::mat4 modelMat = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,-6.0f)); // Construye una matriz de translación con lo que yo le diga
-	modelMat = glm::rotate(modelMat, angle, glm::vec3(1.0f, 0.0f, 0.0f)); // Yo altero la modelMatrix del cubo
-	modelMat = glm::rotate(modelMat, angle, glm::vec3(0.0f, 1.0f, 0.0f)); // El orden de las matrices importan mucho en el movimiento!!!
-	IGlib::setModelMat(objId, modelMat);*/
 }
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
-	//Teclas del editor (1, +, -, X, Y, Z, R): si el editor usa la tecla, no se la pasamos a la cámara
+	// TECLAS PARA EL EDITOR DE OBJETOS
+	// Teclas del editor (1, +, -, X, Y, Z, R): si el editor usa la tecla, no se la pasamos a la cámara
 	if (teclaEditor(key)) {
 		return;
 	}
@@ -344,9 +317,9 @@ void mousePassMoveFunc(int x, int y)
 {
 
 }
+
 void mouseWheelFunc(int wheel, int dir, int x, int y)
 {
-
 	//ZOOM CON LA RUEDA DEL RATÓN
 	float zoomSpeed = 3.0f; //Ángulo que sumamos al hacer zoom
 
@@ -356,7 +329,7 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 		fov += zoomSpeed; //Si va hacia abajo, el fov aumenta (más lejos)
 	}
 
-	//Limitamos el fov para no romperlo :/
+	//Limitamos el fov para no romperlo
 	if (fov < 1.0f)
 		fov = 1.0f; // Zoom máximo
 	if (fov > 120.0f)
@@ -424,7 +397,7 @@ void updateProjectionMatrix() {
 
 // ---------------------- Carga de objetos ---------------------- 
 
-bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscalado, glm::vec3 position) { 
+bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position) { 
 	
 	Assimp::Importer importer;
 	sc = importer.ReadFile(pFile, 
@@ -433,7 +406,7 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 		aiProcess_JoinIdenticalVertices | 
 		aiProcess_SortByPType);
 
-		// Si falla import dime algo
+	// Si falla import dime algo
 	if (!sc) {
 		std::cout << "Falló la carga" << std::endl;
 		return false;
@@ -504,12 +477,14 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 			normalArray
 		);
 
+		/*
 		if (pFile.find("Firefly") != std::string::npos)
 		{
 			fireflyIds.push_back(id);
 		}
+		*/
 
-		outObjId = id;
+		//outObjId = id;
 		modelo.ids.push_back(id); //Guardamos el ID de cada malla
 
 		//Ampliamos la caja del modelo con los vértices de esta malla
@@ -526,8 +501,10 @@ bool DoTheImportThing(const std::string& pFile, int &outObjId, float valorEscala
 	modelo.escala = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
 	modelo.rotacion = glm::mat4(1.0f); //Sin rotación al cargar
 	modelo.escalaInicial = valorEscalado;
-	if (pFile.find("Firefly") != std::string::npos)
+	
+	/*if (pFile.find("Firefly") != std::string::npos)
 		indiceLuciernaga = (int)modelos.size(); //Guardamos cuál es la luciérnaga (su posición la mueve idleFunc)
+		*/
 	modelos.push_back(modelo);
 	actualizarModelo(modelo); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
 
