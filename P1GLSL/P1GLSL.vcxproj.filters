@@ -85,10 +85,10 @@
     <None Include="..\shaders_P1\shader.v9.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="..\..\P2GLSL\P2\shaders_P2\shader.v10.frag">
+    <None Include="..\shaders_P1\shader.v10.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="..\..\P2GLSL\P2\shaders_P2\shader.v10.vert">
+    <None Include="..\shaders_P1\shader.v10.frag">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

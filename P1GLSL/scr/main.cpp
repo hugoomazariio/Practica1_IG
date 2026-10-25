@@ -28,7 +28,6 @@ float fireflyRadius = 1.5f;
 
 glm::vec3 bikePos; //Posición de la moto para que la luciérnaga vuele a su alrededor
 
-
 // Variables para movimiento de la cámara
 glm::vec3 cameraPos = glm::vec3(0.0f, 1.5f, 4.0f); // Posición de la cámara en el espacio
 glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cámara
@@ -128,16 +127,15 @@ int main(int argc, char** argv)
 	//Se pasa el .obj de los objetos que se quieren cargar, y si no se encuenta devuelve -1
 	glm::vec3 posicionMoto = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto, "../3D_assets/Bike/Bike_Textures/Bike_D.png")) return -1;
-	glm::vec3 bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
+	bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
 
-	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -3.0f, 0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png")) return -1;
+	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -1.0f, 0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png")) return -1;
 	indiceLuciernaga = modelos.size() - 1; // El último modelo añadido a la lista es la luciérnaga
 
 	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 0.5f, glm::vec3(1.0f, 0.0f, -0.5f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg")) return -1;
 
 
 	// CBs (Callbacks)
-	// Cada vez que el sistema detecte que el usuario ha rescalado la pantalla, hecho click, etc. Recoge los eventos y nos avisa
 	IGlib::setResizeCB(resizeFunc);
 	IGlib::setIdleCB(idleFunc);
 	IGlib::setKeyboardCB(keyboardFunc);
@@ -145,7 +143,6 @@ int main(int argc, char** argv)
 	IGlib::setMouseMoveCB(mouseMoveFunc);
 	IGlib::setMousePassiveMoveCB(mousePassMoveFunc);
 	IGlib::setMouseWheelMoveCB(mouseWheelFunc);
-
 
 	// Mainloop
 	IGlib::mainLoop();
@@ -178,7 +175,7 @@ void idleFunc()
 
 
 	// Pequeño movimiento vertical para simular vuelo
-	fireflyPos.y = bikePos.y + 2.0f + sin(fireflyAngle * 3.0f) * 0.3f;
+	fireflyPos.y = bikePos.y + 1.0f + sin(fireflyAngle * 3.0f) * 0.3f;
 
 	//La posición la mueve la órbita, pero la escala la controla el editor (así se puede escalar la luciérnaga con el teclado)
 	if (indiceLuciernaga >= 0) {
@@ -397,7 +394,6 @@ void updateProjectionMatrix() {
 
 
 // ---------------------- Carga de objetos ---------------------- 
-
 bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, const std::string& colorTex) {
 
 	Assimp::Importer importer;
@@ -490,14 +486,6 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 		);
 		IGlib::addColorTex(id, colorTex.c_str()); //Textura de color (difusa) de todas las mallas del modelo
 
-		/*
-		if (pFile.find("Firefly") != std::string::npos)
-		{
-			fireflyIds.push_back(id);
-		}
-		*/
-
-		//outObjId = id;
 		modelo.ids.push_back(id); //Guardamos el ID de cada malla
 
 		//Ampliamos la caja del modelo con los vértices de esta malla
@@ -515,9 +503,6 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 	modelo.rotacion = glm::mat4(1.0f); //Sin rotación al cargar
 	modelo.escalaInicial = valorEscalado;
 
-	/*if (pFile.find("Firefly") != std::string::npos)
-		indiceLuciernaga = (int)modelos.size(); //Guardamos cuál es la luciérnaga (su posición la mueve idleFunc)
-		*/
 	modelos.push_back(modelo);
 	actualizarModelo(modelo); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
 
