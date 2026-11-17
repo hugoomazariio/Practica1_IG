@@ -1,11 +1,22 @@
 #version 330 core
 
 in vec3 inPos;	
-uniform mat4 modelViewProj; // Ahora soy más eficiente, y veo que la librería me ha hecho esa multiplicación
+in vec2 inTexCoord;
+in vec3 inNormal;
+
+uniform mat4 normal;
+uniform mat4 modelView;
+uniform mat4 modelViewProj;
+
+out vec2 coordText;
+out vec3 pos; 
+out vec3 norm;
 
 void main()
 {
-	
-
-	gl_Position = modelViewProj*vec4(inPos, 1.0) ; 
+	norm = (normal * vec4(inNormal, 1.0)).xyz; // La normal que pasamos está interpolada, y no tiene mod 1, no hago ese normalize de antes y me lo ahorro
+	pos = (modelView * vec4(inPos, 1.0)).xyz; 
+	coordText = inTexCoord;
+	gl_Position =  modelViewProj * vec4 (inPos,1.0);
 }
+

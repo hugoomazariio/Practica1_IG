@@ -34,24 +34,10 @@
     <None Include="..\shaders_P1\shader.v0.vert" />
     <None Include="..\shaders_P1\shader.v1.frag" />
     <None Include="..\shaders_P1\shader.v1.vert" />
-    <None Include="..\shaders_P1\shader.v10.frag" />
-    <None Include="..\shaders_P1\shader.v10.vert" />
     <None Include="..\shaders_P1\shader.v2.frag" />
     <None Include="..\shaders_P1\shader.v2.vert" />
     <None Include="..\shaders_P1\shader.v3.frag" />
     <None Include="..\shaders_P1\shader.v3.vert" />
-    <None Include="..\shaders_P1\shader.v4.frag" />
-    <None Include="..\shaders_P1\shader.v4.vert" />
-    <None Include="..\shaders_P1\shader.v5.frag" />
-    <None Include="..\shaders_P1\shader.v5.vert" />
-    <None Include="..\shaders_P1\shader.v6.frag" />
-    <None Include="..\shaders_P1\shader.v6.vert" />
-    <None Include="..\shaders_P1\shader.v7.frag" />
-    <None Include="..\shaders_P1\shader.v7.vert" />
-    <None Include="..\shaders_P1\shader.v8.frag" />
-    <None Include="..\shaders_P1\shader.v8.vert" />
-    <None Include="..\shaders_P1\shader.v9.frag" />
-    <None Include="..\shaders_P1\shader.v9.vert" />
     <None Include="..\shaders_P1\shader_allvariables.frag" />
     <None Include="..\shaders_P1\shader_allvariables.vert" />
   </ItemGroup>
