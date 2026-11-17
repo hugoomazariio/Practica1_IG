@@ -67,7 +67,7 @@ int fireflyIndex = -1;
 int bikeIndex = -1;
 int swordIndex = -1;
 
-////////////////////////////////////////////////
+// ---------------------- Declaración de métodos ---------------------- 
 //Declaración de CB
 void resizeFunc(int width, int height);
 void idleFunc();
@@ -96,7 +96,7 @@ bool DoTheImportThing(const std::string& pFile, float scaleValue, glm::vec3 posi
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v3.vert", "../shaders_P1/shader.v3.frag"))
+	if (!IGlib::init("../shaders_P1/shader.v7.vert", "../shaders_P1/shader.v7.frag"))
 		return -1;
 
 	//Matriz de proyección
@@ -307,9 +307,7 @@ void mouseMoveFunc(int x, int y)
 }
 
 void mousePassMoveFunc(int x, int y)
-{
-
-}
+{ }
 
 void mouseWheelFunc(int wheel, int dir, int x, int y)
 {
@@ -386,19 +384,17 @@ void updateProjectionMatrix() {
 	IGlib::setProjMat(proj);
 }
 
-
 // ---------------------- CARGA DE OBJETOS ----------------------
-
 bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, glm::vec3 rotacion, const std::string& colorTex, const std::string& emiTex
 	, const std::string& normalTex, const std::string& specularTex, const std::string& auxiliarTex) {
+
 	// Declaramos sc como variable local
 	const aiScene* sc;
 
 	Assimp::Importer importer;
 	sc = importer.ReadFile(pFile,
 		aiProcess_CalcTangentSpace |
-		aiProcess_Triangulate |
-		//aiProcess_GenSmoothNormals| ???
+		aiProcess_Triangulate | 
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_SortByPType);
 
@@ -410,7 +406,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 
 	std::cout << "Se han cargado " << sc->mNumMeshes << " mesh(es)" << std::endl;
 
-	// Un modelo puede tener varias mallas (una por material): las agrupamos para moverlas juntas
+	// Un modelo puede tener varias mallas (una por material): las agrupamos 
 	Model modelo;
 
 	// Bucle de carga
@@ -432,8 +428,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 		if (mesh->HasFaces()) {
 			for (unsigned int t = 0; t < mesh->mNumFaces; ++t) {
 				const aiFace* face = &mesh->mFaces[t];
-				memcpy(&faceArray[faceIndex], face->mIndices, 3 *
-					sizeof(unsigned int));
+				memcpy(&faceArray[faceIndex], face->mIndices, 3 * sizeof(unsigned int));
 				faceIndex += 3;
 			}
 		}
@@ -450,6 +445,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			}
 		}
 
+		// Array de normales
 		float* normalArray = NULL;
 		if (mesh->HasNormals()) {
 			normalArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
@@ -462,7 +458,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			}
 		}
 
-		//Coordenadas de textura: 2 valores (u, v) por vértice. Solo usamos el primer juego (el 0)
+		// Array de oordenadas de textura: 2 valores (u, v) por vértice. Solo usamos el primer juego (el 0)
 		float* texCoordArray = NULL;
 		if (mesh->HasTextureCoords(0)) {
 			texCoordArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 2);
@@ -472,14 +468,26 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			}
 		}
 
+		// Array de tangentes 
+		float* tangentArray = NULL;
+		if (mesh->HasTangentsAndBitangents()) {
+			tangentArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
+			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+				tangentArray[3 * k] = mesh->mTangents[k].x;
+				tangentArray[3 * k + 1] = mesh->mTangents[k].y;
+				tangentArray[3 * k + 2] = mesh->mTangents[k].z;
+			}
+		}
+
 		int id = IGlib::createObj(
 			mesh->mNumFaces,
 			mesh->mNumVertices,
 			faceArray,
 			vertexArray,
-			0,
+			0, // color
 			normalArray,
-			texCoordArray
+			texCoordArray,
+			tangentArray
 		);
 
 		IGlib::addColorTex(id, colorTex.c_str()); //Textura de color (difusa) de todas las mallas del modelo
