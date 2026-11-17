@@ -16,7 +16,7 @@ float alpha = 50.0; // Exponente de brillo
 
 
 // Propiedades de la luz
-vec3 Ia = vec3(0.2); // Intensidad ambiental de la luz  
+vec3 Ia = vec3(0.9); // Intensidad ambiental de la luz  
 vec3 Id = vec3(0.5); // Intensidad difusa de la luz 
 vec3 Is = vec3 (0.3, 0.3, 0.0); //Intensidad especular de luz 
 vec3 lpos = vec3(0.0, 2.0, 0.0); // Posición de la luz

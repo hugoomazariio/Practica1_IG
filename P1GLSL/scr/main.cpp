@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
-#include <cfloat>
 #define M_PI 3.14159265
 
 // Assimp library
@@ -15,25 +14,27 @@
 #include <assimp/postprocess.h> // Flags de procesado
 
 
-// ---------------------- Variables ---------------------- 
+// ---------------------- Variables ----------------------
 //Idenficadores de los objetos de la escena
 int objId = -1;
+int objID = 10;
 
-// Variables assimp
-const aiScene* sc;
+// Variable timer para animación en shaders
+static unsigned int my_timer;
 
-//Variables para movimiento de la luciérnaga
+//Variables para movimiento de objetos
 float fireflyAngle = 0.0f;
-float fireflyRadius = 1.5f;
+float fireflyRadius = 0.5f;
 
-glm::vec3 bikePos; //Posición de la moto para que la luciérnaga vuele a su alrededor
+float bikeAngle = 0.0f;
+glm::vec3 bikePos;
 
 // Variables para movimiento de la cámara
-glm::vec3 cameraPos = glm::vec3(0.0f, 1.5f, 4.0f); // Posición de la cámara en el espacio
+glm::vec3 cameraPos = glm::vec3(0.0f, 1.0f, 1.5f); // Posición de la cámara en el espacio
 glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cámara
 glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); //Vector hacia arriba (eje Y positivo)
 
-float angHor = -90.0f; //Ángulo inicial de la cámara (horizontal). Comenzamos en -90 para que la cámara comience mirando hacia delante 
+float angHor = -90.0f; //Ángulo inicial de la cámara (horizontal). Comenzamos en -90 para que la cámara comience mirando hacia delante
 float angVert = 0.0f; //Ángulo inicial de la cámara (vertical)
 
 glm::vec3 frontCam; //Vector que apunta delante de la cámara
@@ -46,38 +47,28 @@ float lastY = 300.0f;
 bool firstMouse = true; // Nos ayuda a reducir saltos incómodos al mover la cámara
 bool rightClicPressed; // Detecta si se está pulsando el clic derecho para el movimiento de cámara
 
-// Variables para zoom 
+// Variables para zoom
 float fov = 60.0f; //Ángulo inicial de visión
 float aspectRatio; //Proporción de la ventana (ancho-alto)
 
-// Variables para seleccionar y escalar objetos
+
+// Modelos cargados
 // Un modelo cargado puede tener varias mallas (una por material), así que se guardan todas juntas
-struct Modelo {
+struct Model {
 	std::vector<int> ids; //IDs de las mallas (los que devuelve createObj)
-	glm::vec3 posicion; //Dónde está el modelo en el mundo
-	glm::vec3 escala; //Escala en cada eje
-	glm::mat4 rotacion; // Rotación acumulado del modelo (matriz 4x4)
-	float escalaInicial; //Escala con la que se cargó el modelo (para el reset con R)
-	glm::vec3 posicionInicial; //Posición con la que se cargó el modelo (para el reset con R)
-	glm::vec3 boundsMin, boundsMax; //Caja que rodea al modelo (en coordenadas del propio modelo), para detectar el clic
+	glm::vec3 position; //Dónde está el modelo en el mundo
+	glm::vec3 scale; //Escala en cada eje
+	glm::vec3 rotation; //Rotación sobre cada eje
 };
 
-std::vector<Modelo> modelos; //Todos los modelos de la escena
-int seleccionado = -1; //Índice del modelo seleccionado (-1 = ninguno)
-bool modoEscalado = false; //Se activa con la tecla 1
-bool modoRotacion = false; // Se activa con la tecla 2
-bool modoTraslacion = false; // Se activa con la tecla 3
-int indiceLuciernaga = -1; //Índice (en "modelos") de la luciérnaga, que se mueve sola en idleFunc
-int ejeEscalado = 0; //Eje de escalado y de rotación: 0 = los tres ejes (en rotación, 0 = eje Y), 1 = X, 2 = Y, 3 = Z
+std::vector<Model> models; //Todos los modelos de la escena
 
-glm::mat4 viewMat = glm::mat4(1.0f); //Copia de la matriz de vista (se necesita para saber qué objeto hay bajo el ratón)
-glm::mat4 projMat = glm::mat4(1.0f); //Copia de la matriz de proyección
-
-int anchoVentana; //Tamaño de la ventana en píxeles
-int altoVentana;
+int fireflyIndex = -1;
+int bikeIndex = -1;
+int swordIndex = -1;
 
 ////////////////////////////////////////////////
-//Declaraci�n de CB
+//Declaración de CB
 void resizeFunc(int width, int height);
 void idleFunc();
 void keyboardFunc(unsigned char key, int x, int y);
@@ -92,21 +83,16 @@ glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up); //Para cr
 
 void updateProjectionMatrix(); //Para actualizar los datos de la matriz de proyección (Zoom)
 
-//Selección y escalado de objetos
-glm::mat4 matrizModelo(const Modelo& m); //Matriz de modelo = traslación * escala
-void actualizarModelo(const Modelo& m); //Envía la matriz de modelo a todas las mallas del modelo
-void seleccionarObjeto(int mx, int my); //Selecciona el modelo que haya bajo el ratón
-bool teclaEditor(unsigned char key); //Gestiona las teclas del editor (devuelve true si ha usado la tecla)
-void escalarSeleccionado(float factor); //Multiplica la escala del modelo seleccionado
-void rotarSeleccionado(float grados); //Gira el modelo seleccionado alrededor del eje elegido
-void trasladarSeleccionado(float distancia); //Mueve el modelo seleccionado sobre el eje elegido
-bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t); //Intersección rayo-caja
+//Matriz de modelo
+glm::mat4 modelMatrix(const Model& m); //Matriz de modelo
+void updateModel(const Model& m); //Envía la matriz de modelo a todas las mallas del modelo
 
 // Carga de objetos
-bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, const std::string& colorTex);
+bool DoTheImportThing(const std::string& pFile, float scaleValue, glm::vec3 position, glm::vec3 rotation, const std::string& colorTex, const std::string& emiTex = "",
+	const std::string& normalTex = "", const std::string& specularTex = "", const std::string& auxiliarTex = "");
 
 
-// ---------------------- Método main ---------------------- 
+// ---------------------- Método main ----------------------
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
@@ -123,16 +109,31 @@ int main(int argc, char** argv)
 
 	updateCameraVectors();
 
+	my_timer = 0; //Inicialización del timer
+	IGlib::setTimer(my_timer);
 
 	//Se pasa el .obj de los objetos que se quieren cargar, y si no se encuenta devuelve -1
-	glm::vec3 posicionMoto = glm::vec3(0.0f, 0.0f, 0.0f);
-	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto, "../3D_assets/Bike/Bike_Textures/Bike_D.png")) return -1;
-	bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
+	//glm::vec3 posicionMoto = glm::vec3(0.0f, 0.0f, 0.0f);
+	//if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto, glm::vec3(0.0f, -45.0f, 0.0f), "../3D_assets/Bike/Bike_Textures/Bike_D.png", "", "../3D_assets/Bike/Bike_Textures/Bike_NRM.png", "", "")) return -1;
+	//bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
+	//bikeIndex = models.size() -1;
 
-	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -1.0f, 0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png")) return -1;
-	indiceLuciernaga = modelos.size() - 1; // El último modelo añadido a la lista es la luciérnaga
+	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png",
+		"../3D_assets/Firefly/Firefly_Textures/firefly_emissive.png", "../3D_assets/Firefly/Firefly_Textures/firefly_normal.png",
+		"../3D_assets/Firefly/Firefly_Textures/firefly_bump.png", "../3D_assets/Firefly/Firefly_Textures/firefly_opacity.png")) return -1;
+	fireflyIndex = models.size() - 1; // El último modelo añadido a la lista es la luciérnaga
 
-	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 0.5f, glm::vec3(1.0f, 0.0f, -0.5f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg")) return -1;
+	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 1.0f, glm::vec3(0.0f, -0.4f, 0.0f), glm::vec3(-10.0f, 0.0f, -15.0f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg",
+		"../3D_assets/Sword/Sword_Textures/Espada_Emissive.jpeg", "../3D_assets/Sword/Sword_Textures/Espada_Normal.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Specular.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Roughness.jpg")) return -1;
+	swordIndex = models.size() - 1;
+
+
+	objID = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex,
+		cubeVertexPos, cubeVertexTexCoord, cubeVertexTangent);
+
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0, -2.0, 0.0));
+	IGlib::setModelMat(objID, model);
 
 
 	// CBs (Callbacks)
@@ -150,7 +151,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-// ---------------------- CB ---------------------- 
+// ---------------------- CB ----------------------
 void resizeFunc(int width, int height)
 {
 	//AJUSTAR EL ASPECT RATIO MEDIANTE MATRIZ DE PROYECCIÓN
@@ -158,41 +159,41 @@ void resizeFunc(int width, int height)
 		height = 1; //Para evitar divisiones entre 0
 
 	aspectRatio = (float)width / (float)height; //Para guardar el ratio de la cámara (matriz de proyección)
-	anchoVentana = width; //Guardamos el tamaño de la ventana para convertir el clic en un rayo
-	altoVentana = height;
 	updateProjectionMatrix();
 }
 
 void idleFunc()
 {
-	//Movimiento de la luciérnaga
-	fireflyAngle += 0.001f;
+	//Timer (animación en shader)
+	my_timer++;
+	IGlib::setTimer(my_timer);
+
+
+	//Movimiento de la luciérnaga (que depende del tiempo)
+	fireflyAngle = fmod(my_timer * 0.001f, 2.0f * M_PI);
 
 	glm::vec3 fireflyPos;
 
 	fireflyPos.x = bikePos.x + cos(fireflyAngle) * fireflyRadius;
 	fireflyPos.z = bikePos.z + sin(fireflyAngle) * fireflyRadius;
 
-
 	// Pequeño movimiento vertical para simular vuelo
 	fireflyPos.y = bikePos.y + 1.0f + sin(fireflyAngle * 3.0f) * 0.3f;
 
-	//La posición la mueve la órbita, pero la escala la controla el editor (así se puede escalar la luciérnaga con el teclado)
-	if (indiceLuciernaga >= 0) {
-		modelos[indiceLuciernaga].posicion = fireflyPos;
-		actualizarModelo(modelos[indiceLuciernaga]);
+	//Actualizamos la posición de la luciérnaga manteniendo su escala
+	if (fireflyIndex >= 0) {
+		models[fireflyIndex].position = fireflyPos;
+		models[fireflyIndex].rotation.y = -glm::degrees(fireflyAngle) - 90.0f; //Hacemos que la luciernaga mire hacia donde vuela (+90 para incluir un desfase; sino, vuela de lado)
+		updateModel(models[fireflyIndex]);
 	}
 
+	// AAA
+	models[swordIndex].rotation.y += 0.01f;
+	updateModel(models[swordIndex]);
 }
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
-	// TECLAS PARA EL EDITOR DE OBJETOS
-	// Teclas del editor (1, +, -, X, Y, Z, R): si el editor usa la tecla, no se la pasamos a la cámara
-	if (teclaEditor(key)) {
-		return;
-	}
-
 	//MOVIMIENTO DE LA CÁMARA MEDIANTE TECLADO
 	float cameraSpeed = 0.5f; //Distancia que sumamos o restamos para mover la cámara
 	float rotationSpeed = 5.0f; //Ángulo que sumamos o restamos para girar la cámara
@@ -250,11 +251,6 @@ void mouseFunc(int button, int state, int x, int y)
 		rightClicPressed = (state == 0);
 		firstMouse = true;
 	}
-
-	//Clic izquierdo (botón 0) al pulsar: seleccionamos el objeto que haya bajo el ratón
-	if (button == 0 && state == 0) {
-		seleccionarObjeto(x, y);
-	}
 }
 
 
@@ -290,10 +286,10 @@ void mouseMoveFunc(int x, int y)
 	//Limitamos los ángulos para no romperlo (Si el ángulo vertical llega a 90 grados, puede entrar en conflicto con el vector upVector y romper la matriz de vista)
 	if (angVert > 89.0f)
 		angVert = 89.0f;
-	if (angVert < -89.9f)
+	if (angVert < -89.0f)
 		angVert = -89.0f;
 
-	//Convertimos los ángulos a coordenadas para saber a dónde estamos mirando tras mover el ratón 
+	//Convertimos los ángulos a coordenadas para saber a dónde estamos mirando tras mover el ratón
 	glm::vec3 frontDirection;
 	frontDirection.x = cos(glm::radians(angHor)) * cos(glm::radians(angVert)); //Coseno para calcular el eje x (deerecha-izquierda) y coseno para el eje y (la proyección del ángulo vertical en el eje horizontal)
 	frontDirection.y = sin(glm::radians(angVert)); //La altura depende solo del ángulo vertical (con el seno)
@@ -336,11 +332,10 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 	updateProjectionMatrix();
 }
 
-// ---------------------- Movimiento de cámara ---------------------- 
+// ---------------------- MOVIMIENTO DE CÁMARA ----------------------
 void updateCameraVectors() {
 	glm::mat4 view = lookAtMatrix(cameraPos, targetPos, upVector);
 	IGlib::setViewMat(view);
-	viewMat = view; //Guardamos la vista para el picking
 }
 
 glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up) {
@@ -389,17 +384,21 @@ void updateProjectionMatrix() {
 	proj[3].w = 0.0;
 
 	IGlib::setProjMat(proj);
-	projMat = proj; //Guardamos la proyección para el picking
 }
 
 
-// ---------------------- Carga de objetos ---------------------- 
-bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, const std::string& colorTex) {
+// ---------------------- CARGA DE OBJETOS ----------------------
+
+bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 position, glm::vec3 rotacion, const std::string& colorTex, const std::string& emiTex
+	, const std::string& normalTex, const std::string& specularTex, const std::string& auxiliarTex) {
+	// Declaramos sc como variable local
+	const aiScene* sc;
 
 	Assimp::Importer importer;
 	sc = importer.ReadFile(pFile,
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
+		//aiProcess_GenSmoothNormals| ???
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_SortByPType);
 
@@ -408,41 +407,38 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 		std::cout << "Falló la carga" << std::endl;
 		return false;
 	}
-	std::cout << "Se han cargado " << sc->mNumMeshes << " meshes" << std::endl;
 
-	// Un modelo puede tener varias mallas (una por material): las agrupamos para escalarlas y seleccionarlas juntas
-	Modelo modelo;
-	modelo.boundsMin = glm::vec3(FLT_MAX);
-	modelo.boundsMax = glm::vec3(-FLT_MAX);
+	std::cout << "Se han cargado " << sc->mNumMeshes << " mesh(es)" << std::endl;
 
-	// bucle de carga 
+	// Un modelo puede tener varias mallas (una por material): las agrupamos para moverlas juntas
+	Model modelo;
+
+	// Bucle de carga
 	for (unsigned int n = 0; n < sc->mNumMeshes; ++n) {
 		unsigned int* faceArray;
 		const aiMesh* mesh = sc->mMeshes[n];
-		// Creo el array con un malloc (memory allocation)
+
+		if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) continue; //Ignora si hay alguna primitiva que no sea un triángulo
+
 		// Reserva memoria y cuando termina la reserva me devuelve un puntero. Fuerzo que ese puntero sea un unsigned int
 		faceArray = (unsigned int*)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3); // *3 porque la cara es un triangulo
 		unsigned int faceIndex = 0;
 
 		float* vertexArray;
 		unsigned int vertexIndex = 0;
-
-		float* normalArray;
 		unsigned int normalIndex = 0;
 
-		float* textCoordsArray;
-
 		// Para rellenar los triángulos
-		if (mesh->HasFaces()) { //por defecto siempre tiene, pero no está de más chequear
+		if (mesh->HasFaces()) {
 			for (unsigned int t = 0; t < mesh->mNumFaces; ++t) {
 				const aiFace* face = &mesh->mFaces[t];
 				memcpy(&faceArray[faceIndex], face->mIndices, 3 *
-					sizeof(unsigned int)); // Copio los bytes que me hacen falta
+					sizeof(unsigned int));
 				faceIndex += 3;
 			}
 		}
 
-		if (mesh->HasPositions()) { //Idem: por defecto siempre tiene.
+		if (mesh->HasPositions()) {
 			vertexArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
 
 			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
@@ -454,6 +450,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			}
 		}
 
+		float* normalArray = NULL;
 		if (mesh->HasNormals()) {
 			normalArray = (float*)malloc(sizeof(float) * mesh->mNumVertices * 3);
 			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
@@ -484,216 +481,44 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			normalArray,
 			texCoordArray
 		);
+
 		IGlib::addColorTex(id, colorTex.c_str()); //Textura de color (difusa) de todas las mallas del modelo
+		if (!emiTex.empty())
+			IGlib::addEmissiveTex(id, emiTex.c_str());
+		if (!normalTex.empty())
+			IGlib::addNormalTex(id, normalTex.c_str());
+		if (!specularTex.empty())
+			IGlib::addSpecularTex(id, specularTex.c_str());
+		if (!auxiliarTex.empty())
+			IGlib::addAuxiliarTex(id, auxiliarTex.c_str());
 
 		modelo.ids.push_back(id); //Guardamos el ID de cada malla
-
-		//Ampliamos la caja del modelo con los vértices de esta malla
-		for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
-			glm::vec3 v(vertexArray[3 * k], vertexArray[3 * k + 1], vertexArray[3 * k + 2]);
-			modelo.boundsMin = glm::min(modelo.boundsMin, v);
-			modelo.boundsMax = glm::max(modelo.boundsMax, v);
-		}
 	}
 
-	//Para que los objetos queden donde estaban, multiplicamos la posición por la escala y usamos traslación * escalado 
-	modelo.posicion = position * valorEscalado;
-	modelo.posicionInicial = modelo.posicion;
-	modelo.escala = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
-	modelo.rotacion = glm::mat4(1.0f); //Sin rotación al cargar
-	modelo.escalaInicial = valorEscalado;
+	//Para que los objetos queden donde estaban, multiplicamos la posición por la escala y usamos traslación * rotación * escalado
+	modelo.position = position * valorEscalado;
+	modelo.rotation = rotacion;
+	modelo.scale = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
 
-	modelos.push_back(modelo);
-	actualizarModelo(modelo); //dibuja el objeto en la posicion y escalado que se le ha dado antes 
+	models.push_back(modelo);
+	updateModel(modelo); //dibuja el objeto en la posicion y escalado que se le ha dado antes
 
 	return true;
 }
 
 
-// ---------------------- Selección y escalado de objetos ---------------------- 
-
-glm::mat4 matrizModelo(const Modelo& m) {
-	glm::mat4 mat = glm::translate(glm::mat4(1.0f), m.posicion); // Primero la traslación
-	mat = mat * m.rotacion; // luego la rotación
-	mat = glm::scale(mat, m.escala); // y el escalado se aplica sobre los ejes del propio objeto
+// ---------------------- MATRIZ DE MODELO ----------------------
+glm::mat4 modelMatrix(const Model& m) {
+	glm::mat4 mat = glm::translate(glm::mat4(1.0f), m.position); // Traslación
+	mat = glm::rotate(mat, glm::radians(m.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación (X)
+	mat = glm::rotate(mat, glm::radians(m.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación (Y)
+	mat = glm::rotate(mat, glm::radians(m.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Rotación (Z)
+	mat = glm::scale(mat, m.scale); // Escalado
 	return mat;
 }
 
-void actualizarModelo(const Modelo& m) {
-	glm::mat4 mat = matrizModelo(m);
+void updateModel(const Model& m) {
+	glm::mat4 mat = modelMatrix(m);
 	for (size_t i = 0; i < m.ids.size(); ++i) //Todas las mallas del modelo comparten la misma matriz
 		IGlib::setModelMat(m.ids[i], mat);
-}
-
-void seleccionarObjeto(int mx, int my) {
-	//Convertimos el pixel del clic en un rayo: píxeles -> coordenadas de -1 a 1 -> mundo (deshaciendo proyección y vista)
-	float nx = 2.0f * mx / anchoVentana - 1.0f;
-	float ny = 1.0f - 2.0f * my / altoVentana; //En la ventana Y crece hacia abajo, en OpenGL hacia arriba
-	glm::mat4 inversa = glm::inverse(projMat * viewMat);
-	glm::vec4 cercano = inversa * glm::vec4(nx, ny, -1.0f, 1.0f); //Punto del rayo en el plano near
-	glm::vec4 lejano = inversa * glm::vec4(nx, ny, 1.0f, 1.0f); //Punto del rayo en el plano far
-	glm::vec3 origen = glm::vec3(cercano) / cercano.w;
-	glm::vec3 dir = glm::vec3(lejano) / lejano.w - origen; //Sin normalizar: t = 0 en near y t = 1 en far
-
-	int elegido = -1;
-	float mejorT = 2.0f;
-	for (size_t i = 0; i < modelos.size(); ++i) {
-		//Pasamos el rayo al espacio del propio modelo: así la caja siempre está alineada con los ejes, aunque el modelo esté escalado
-		glm::mat4 inv = glm::inverse(matrizModelo(modelos[i]));
-		glm::vec3 oLocal = glm::vec3(inv * glm::vec4(origen, 1.0f));
-		glm::vec3 dLocal = glm::vec3(inv * glm::vec4(dir, 0.0f));
-		float t;
-		if (rayoCaja(oLocal, dLocal, modelos[i].boundsMin, modelos[i].boundsMax, t) && t < mejorT) {
-			mejorT = t; //Nos quedamos con el modelo más cercano a la cámara
-			elegido = (int)i;
-		}
-	}
-
-	seleccionado = elegido;
-	ejeEscalado = 0;
-	if (seleccionado < 0) {
-		modoEscalado = false;
-		modoRotacion = false;
-		modoTraslacion = false;
-		std::cout << "Nada seleccionado" << std::endl;
-	}
-	else {
-		std::cout << "Seleccionado el modelo " << seleccionado << " (pulsa 1 para escalar, 2 para rotar o 3 para mover)" << std::endl;
-	}
-}
-
-bool teclaEditor(unsigned char key) {
-	if (key == '1') { //Activa el modo escalado
-		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
-		modoEscalado = true;
-		modoRotacion = false;
-		modoTraslacion = false;
-		ejeEscalado = 0; //Al escalar, por defecto se escalan los tres ejes
-		std::cout << "Modo escalado: + y - para cambiar el tamaño, X/Y/Z para elegir eje, R para resetear" << std::endl;
-		return true;
-	}
-
-	if (key == '2') { //Activa el modo rotación
-		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
-		modoRotacion = true;
-		modoEscalado = false;
-		modoTraslacion = false;
-		if (ejeEscalado == 0) ejeEscalado = 2; //Al rotar, por defecto se gira sobre el eje Y
-		std::cout << "Modo rotacion: + y - para girar, X/Y/Z para elegir eje, R para resetear" << std::endl;
-		return true;
-	}
-
-	if (key == '3') { //Activa el modo traslación
-		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
-		modoTraslacion = true;
-		modoEscalado = false;
-		modoRotacion = false;
-		if (ejeEscalado == 0) ejeEscalado = 1; //Al mover, por defecto se mueve sobre el eje X
-		std::cout << "Modo traslacion: + y - para mover, X/Y/Z para elegir eje, R para resetear" << std::endl;
-		return true;
-	}
-
-	if (key == 'x' || key == 'X' || key == 'y' || key == 'Y' || key == 'z' || key == 'Z') { //Elegir el eje
-		if (seleccionado < 0) return true;
-		int eje = (key == 'x' || key == 'X') ? 1 : ((key == 'y' || key == 'Y') ? 2 : 3);
-		if (modoRotacion || modoTraslacion)
-			ejeEscalado = eje; //Al rotar siempre hace falta un eje concreto
-		else
-			ejeEscalado = (ejeEscalado == eje) ? 0 : eje; //Al escalar, pulsar el mismo eje otra vez vuelve a los tres
-		const char* nombres[] = { "XYZ", "X", "Y", "Z" };
-		std::cout << "Eje: " << nombres[ejeEscalado] << std::endl;
-		return true;
-	}
-
-	if (key == '+' || key == '=') { //Agrandar o girar en un sentido (el '=' es la misma tecla que '+' sin pulsar mayúsculas)
-		if (seleccionado >= 0 && modoEscalado) escalarSeleccionado(1.1f);
-		if (seleccionado >= 0 && modoRotacion) rotarSeleccionado(5.0f);
-		if (seleccionado >= 0 && modoTraslacion) trasladarSeleccionado(0.25f);
-		return true;
-	}
-
-	if (key == '-' || key == '_') { //Reducir o girar en sentido contrario
-		if (seleccionado >= 0 && modoEscalado) escalarSeleccionado(1.0f / 1.1f);
-		if (seleccionado >= 0 && modoRotacion) rotarSeleccionado(-5.0f);
-		if (seleccionado >= 0 && modoTraslacion) trasladarSeleccionado(-0.25f);
-		return true;
-	}
-
-	if (key == 'r' || key == 'R') { //Volver al valor original de lo que se está editando
-		if (seleccionado < 0) return true;
-		if (modoRotacion) {
-			modelos[seleccionado].rotacion = glm::mat4(1.0f); //Sin rotación
-		}
-		else if (modoTraslacion) {
-			modelos[seleccionado].posicion = modelos[seleccionado].posicionInicial; //Posición original
-		}
-		else {
-			float original = modelos[seleccionado].escalaInicial; //Escala con la que se cargó el modelo
-			modelos[seleccionado].escala = glm::vec3(original);
-		}
-		actualizarModelo(modelos[seleccionado]);
-		return true;
-	}
-
-	return false; //No es una tecla del editor: la usa la cámara
-}
-
-void escalarSeleccionado(float factor) {
-	float minimo = modelos[seleccionado].escalaInicial / 20.0f; //Límites relativos a la escala de carga: entre 1/20 y 20 veces,
-	float maximo = modelos[seleccionado].escalaInicial * 20.0f; //para que el objeto no desaparezca ni sea gigante
-	glm::vec3& e = modelos[seleccionado].escala;
-	if (ejeEscalado == 0 || ejeEscalado == 1) e.x = glm::clamp(e.x * factor, minimo, maximo);
-	if (ejeEscalado == 0 || ejeEscalado == 2) e.y = glm::clamp(e.y * factor, minimo, maximo);
-	if (ejeEscalado == 0 || ejeEscalado == 3) e.z = glm::clamp(e.z * factor, minimo, maximo);
-	actualizarModelo(modelos[seleccionado]);
-	std::cout << "Escala: (" << e.x << ", " << e.y << ", " << e.z << ")" << std::endl;
-}
-
-void rotarSeleccionado(float grados) {
-	glm::vec3 eje(0.0f, 1.0f, 0.0f); //Por defecto, eje Y
-	if (ejeEscalado == 1) eje = glm::vec3(1.0f, 0.0f, 0.0f);
-	if (ejeEscalado == 3) eje = glm::vec3(0.0f, 0.0f, 1.0f);
-
-	//Acumulamos el giro sobre los ejes del propio objeto (multiplicando por la derecha), igual que el escalado
-	glm::mat4 giro = glm::rotate(glm::mat4(1.0f), glm::radians(grados), eje);
-	modelos[seleccionado].rotacion = modelos[seleccionado].rotacion * giro;
-	actualizarModelo(modelos[seleccionado]);
-	std::cout << "Rotado " << grados << " grados" << std::endl;
-}
-
-void trasladarSeleccionado(float distancia) {
-	if (seleccionado == indiceLuciernaga) { //idleFunc recoloca la luciérnaga en cada frame, así que no se puede mover a mano
-		std::cout << "La luciernaga se mueve sola alrededor de la moto, no se puede trasladar" << std::endl;
-		return;
-	}
-
-	glm::vec3 eje(1.0f, 0.0f, 0.0f); //Por defecto, eje X
-	if (ejeEscalado == 2) eje = glm::vec3(0.0f, 1.0f, 0.0f);
-	if (ejeEscalado == 3) eje = glm::vec3(0.0f, 0.0f, 1.0f);
-
-	//Se mueve sobre los ejes del mundo (no los del objeto, que puede estar rotado)
-	glm::vec3& p = modelos[seleccionado].posicion;
-	p += eje * distancia;
-	actualizarModelo(modelos[seleccionado]);
-	std::cout << "Posicion: (" << p.x << ", " << p.y << ", " << p.z << ")" << std::endl;
-}
-
-//Intersección entre el rayo (o + t*d, con t entre 0 y 1) y una caja alineada con los ejes
-bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t) {
-	float tmin = 0.0f, tmax = 1.0f;
-	for (int i = 0; i < 3; ++i) { //Un par de planos por cada eje
-		if (fabs(d[i]) < 1e-8f) {
-			if (o[i] < bmin[i] || o[i] > bmax[i]) return false; //Rayo paralelo a los planos y fuera de ellos
-		}
-		else {
-			float t1 = (bmin[i] - o[i]) / d[i];
-			float t2 = (bmax[i] - o[i]) / d[i];
-			if (t1 > t2) { float aux = t1; t1 = t2; t2 = aux; }
-			if (t1 > tmin) tmin = t1;
-			if (t2 < tmax) tmax = t2;
-			if (tmin > tmax) return false; //Los intervalos no se solapan: el rayo no toca la caja
-		}
-	}
-	t = tmin;
-	return true;
 }
