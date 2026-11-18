@@ -73,5 +73,17 @@
     <None Include="..\shaders_P1\shader.v7.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\shaders_P1\shader.v8.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders_P1\shader.v8.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders_P1\shader.v9.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders_P1\shader.v9.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

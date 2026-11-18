@@ -93,7 +93,7 @@ vec3 shade() {
 
 	// LUZ PUNTUAL (luciérnaga)
 	float angFirefly = mod(time * 0.001f, 2.0 * M_PI); //Ángulo de movimiento de la luciernaga
-	vec3 bikePos = vec3(0.0, 0.0, 0.0); //Posición de la moto
+	vec3 centre = vec3(0.0, 0.0, 0.0); //Posición de la moto
 	float radius = 0.5f; //Radio de la óribita de la luciernaga
 
 	float flickVel = time / 5000.0; //Dividimos el tiempo para que el parpadeo no vaya demasiado rápido
@@ -103,9 +103,9 @@ vec3 shade() {
 	vec3 fireflyColor = vec3(0.2, 0.9, 0.3) * fireflyFlickering;
 
 	//Calculamos la posición de la luz, que tiene que ser el mismo que el de la luciérnaga
-	vec3 posLightFirefly = vec3 (bikePos.x + cos(angFirefly) * radius,
-								bikePos.y + 1.0 + sin(angFirefly * 3.0) * 0.3,
-								bikePos.z + sin(angFirefly) * radius);
+	vec3 posLightFirefly = vec3 (centre.x + cos(angFirefly) * radius,
+								centre.y + 1.0 + sin(angFirefly * 3.0) * 0.3,
+								centre.z + sin(angFirefly) * radius);
 
 	//vec3 posLightFirefly = vec3 (0.0, 0.5, 0.0); //DEPURACIÓN -- QUITAR LUEGO Y DESCOMENTAR LA POSICIÓN REAL
 

@@ -3,14 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v8.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -20,17 +17,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 275,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
               "RelativeDocumentMoniker": "scr\\main.cpp",
               "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
               "RelativeToolTip": "scr\\main.cpp",
-              "ViewState": "AgIAAFYAAAAAAAAAAAArwGIAAAAqAAAAAAAAAA==",
+              "ViewState": "AgIAADAAAAAAAAAAAAAkwD8AAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-09-24T15:02:11.931Z",
               "IsPinned": true,
@@ -42,28 +39,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "shader.v7.vert",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.vert",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v7.vert",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.vert",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v7.vert",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAArAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "shader.v8.frag",
+              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v8.frag",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v8.frag",
+              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v8.frag",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v8.frag",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAkwFMAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-17T19:23:48.444Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "shader.v7.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v7.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v7.frag",
-              "ViewState": "AgIAACoAAAAAAAAAAAAAAEEAAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-17T19:23:14.591Z",
+              "WhenOpened": "2026-11-17T23:50:29.763Z",
               "EditorCaption": ""
             }
           ]

@@ -46,6 +46,10 @@
     <None Include="..\shaders_P1\shader.v6.vert" />
     <None Include="..\shaders_P1\shader.v7.frag" />
     <None Include="..\shaders_P1\shader.v7.vert" />
+    <None Include="..\shaders_P1\shader.v8.frag" />
+    <None Include="..\shaders_P1\shader.v8.vert" />
+    <None Include="..\shaders_P1\shader.v9.frag" />
+    <None Include="..\shaders_P1\shader.v9.vert" />
     <None Include="..\shaders_P1\shader_allvariables.frag" />
     <None Include="..\shaders_P1\shader_allvariables.vert" />
   </ItemGroup>

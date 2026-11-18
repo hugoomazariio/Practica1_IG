@@ -17,7 +17,6 @@
 // ---------------------- Variables ----------------------
 //Idenficadores de los objetos de la escena
 int objId = -1;
-int objID = 10;
 
 // Variable timer para animación en shaders
 static unsigned int my_timer;
@@ -25,9 +24,7 @@ static unsigned int my_timer;
 //Variables para movimiento de objetos
 float fireflyAngle = 0.0f;
 float fireflyRadius = 0.5f;
-
-float bikeAngle = 0.0f;
-glm::vec3 bikePos;
+glm::vec3 centre = glm::vec3(0.0);
 
 // Variables para movimiento de la cámara
 glm::vec3 cameraPos = glm::vec3(0.0f, 1.0f, 1.5f); // Posición de la cámara en el espacio
@@ -51,7 +48,6 @@ bool rightClicPressed; // Detecta si se está pulsando el clic derecho para el m
 float fov = 60.0f; //Ángulo inicial de visión
 float aspectRatio; //Proporción de la ventana (ancho-alto)
 
-
 // Modelos cargados
 // Un modelo cargado puede tener varias mallas (una por material), así que se guardan todas juntas
 struct Model {
@@ -63,6 +59,7 @@ struct Model {
 
 std::vector<Model> models; //Todos los modelos de la escena
 
+//Índices de los modelos
 int fireflyIndex = -1;
 int bikeIndex = -1;
 int swordIndex = -1;
@@ -91,12 +88,11 @@ void updateModel(const Model& m); //Envía la matriz de modelo a todas las malla
 bool DoTheImportThing(const std::string& pFile, float scaleValue, glm::vec3 position, glm::vec3 rotation, const std::string& colorTex, const std::string& emiTex = "",
 	const std::string& normalTex = "", const std::string& specularTex = "", const std::string& auxiliarTex = "");
 
-
 // ---------------------- Método main ----------------------
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v7.vert", "../shaders_P1/shader.v7.frag"))
+	if (!IGlib::init("../shaders_P1/shader.v9.vert", "../shaders_P1/shader.v9.frag"))
 		return -1;
 
 	//Matriz de proyección
@@ -118,22 +114,15 @@ int main(int argc, char** argv)
 	//bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
 	//bikeIndex = models.size() -1;
 
+	// Carga de objetos
 	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png",
 		"../3D_assets/Firefly/Firefly_Textures/firefly_emissive.png", "../3D_assets/Firefly/Firefly_Textures/firefly_normal.png",
 		"../3D_assets/Firefly/Firefly_Textures/firefly_bump.png", "../3D_assets/Firefly/Firefly_Textures/firefly_opacity.png")) return -1;
-	fireflyIndex = models.size() - 1; // El último modelo añadido a la lista es la luciérnaga
+	fireflyIndex = models.size() - 1;
 
 	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 1.0f, glm::vec3(0.0f, -0.4f, 0.0f), glm::vec3(-10.0f, 0.0f, -15.0f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg",
 		"../3D_assets/Sword/Sword_Textures/Espada_Emissive.jpeg", "../3D_assets/Sword/Sword_Textures/Espada_Normal.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Specular.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Roughness.jpg")) return -1;
 	swordIndex = models.size() - 1;
-
-
-	objID = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex,
-		cubeVertexPos, cubeVertexTexCoord, cubeVertexTangent);
-
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0, -2.0, 0.0));
-	IGlib::setModelMat(objID, model);
 
 
 	// CBs (Callbacks)
@@ -174,11 +163,11 @@ void idleFunc()
 
 	glm::vec3 fireflyPos;
 
-	fireflyPos.x = bikePos.x + cos(fireflyAngle) * fireflyRadius;
-	fireflyPos.z = bikePos.z + sin(fireflyAngle) * fireflyRadius;
+	fireflyPos.x = centre.x + cos(fireflyAngle) * fireflyRadius;
+	fireflyPos.z = centre.z + sin(fireflyAngle) * fireflyRadius;
 
 	// Pequeño movimiento vertical para simular vuelo
-	fireflyPos.y = bikePos.y + 1.0f + sin(fireflyAngle * 3.0f) * 0.3f;
+	fireflyPos.y = centre.y + 1.0f + sin(fireflyAngle * 3.0f) * 0.3f;
 
 	//Actualizamos la posición de la luciérnaga manteniendo su escala
 	if (fireflyIndex >= 0) {
@@ -187,7 +176,7 @@ void idleFunc()
 		updateModel(models[fireflyIndex]);
 	}
 
-	// AAA
+	// DEPURACIÓN PARA ILUMINACIÓN -- BORRAR DESPUES
 	models[swordIndex].rotation.y += 0.01f;
 	updateModel(models[swordIndex]);
 }
@@ -227,7 +216,7 @@ void keyboardFunc(unsigned char key, int x, int y)
 		angHor += rotationSpeed;
 	}
 
-	//Movemos el targetPos para hacer que la cámara gire
+	// Movemos el targetPos para hacer que la cámara gire
 	if (key == 'Q' || key == 'q' || key == 'E' || key == 'e') {
 		glm::vec3 frontDirection;
 		frontDirection.x = cos(glm::radians(angHor)); //El coseno calcula las coordenadas en el eje X
@@ -321,7 +310,7 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 		fov += zoomSpeed; //Si va hacia abajo, el fov aumenta (más lejos)
 	}
 
-	//Limitamos el fov para no romperlo
+	//Limitamos el fov
 	if (fov < 1.0f)
 		fov = 1.0f; // Zoom máximo
 	if (fov > 120.0f)
@@ -371,7 +360,7 @@ void updateProjectionMatrix() {
 	glm::mat4 proj = glm::mat4(1.0);
 
 	float f = 1.0f / tan(glm::radians(fov) / 2.0); // Convertimos el fov a radianes y sacamos la tagente de la mitad
-	float far = 20.0;
+	float far = 50.0;
 	float near = 0.1;
 
 	proj[0].x = f / aspectRatio;
@@ -417,7 +406,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 		if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) continue; //Ignora si hay alguna primitiva que no sea un triángulo
 
 		// Reserva memoria y cuando termina la reserva me devuelve un puntero. Fuerzo que ese puntero sea un unsigned int
-		faceArray = (unsigned int*)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3); // *3 porque la cara es un triangulo
+		faceArray = (unsigned int*)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3);
 		unsigned int faceIndex = 0;
 
 		float* vertexArray;
@@ -509,7 +498,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 	modelo.scale = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
 
 	models.push_back(modelo);
-	updateModel(modelo); //dibuja el objeto en la posicion y escalado que se le ha dado antes
+	updateModel(modelo); //Dibuja el objeto en la posicion y escalado que se le ha dado antes
 
 	return true;
 }
