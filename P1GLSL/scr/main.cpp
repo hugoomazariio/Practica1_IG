@@ -488,6 +488,8 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			IGlib::addSpecularTex(id, specularTex.c_str());
 		if (!auxiliarTex.empty())
 			IGlib::addAuxiliarTex(id, auxiliarTex.c_str());
+		else
+			IGlib::addAuxiliarTex(id, colorTex.c_str()); // Si no hay textura auxiliar, usamos el color (para la iluminación en el shader)
 
 		modelo.ids.push_back(id); //Guardamos el ID de cada malla
 	}

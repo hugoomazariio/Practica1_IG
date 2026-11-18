@@ -11,8 +11,7 @@ uniform sampler2D normalTex;
 uniform sampler2D specularTex;
 uniform sampler2D auxiliarTex;
 
-uniform mat4 view; // Matriz de vista para pasar las luces a coordenadas de cámara (cuando movemos la cámara, las luces "hacen el movimiento contrario")
-
+uniform mat4 view; // Matriz de vista para pasar las luces a coordenadas de cámara (para que no se muevan con la cámara)
 out vec4 outColor;
 
 // Propiedades del objeto
@@ -40,8 +39,8 @@ vec3 shade();
 
 void main()
 {
+	Ka = texture(auxiliarTex, coordTex).rgb;
 	Kd = texture(colorTex, coordTex).rgb;
-	Ka = Kd;
 	Ks = texture(specularTex, coordTex).rgb;
 	Ke = texture(emiTex, coordTex).rgb;
 

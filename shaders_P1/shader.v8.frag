@@ -53,7 +53,6 @@ void main()
 	// ------- Texturas ------- 
 	Ka = texture(auxiliarTex, coordTex).rgb;
 	Kd = texture(colorTex, coordTex).rgb;
-	//Ka = Kd;
 	Ks = texture(specularTex, coordTex).rgb;
 	Ke = texture(emiTex, coordTex).rgb;
 
@@ -69,18 +68,6 @@ void main()
 	 N = normalize (TBN * normTex);
 
 	 // ------- Niebla ------- 
-	 /*vec3 color = shade(); // Guardamos los cálculos de la iluminación en una variable
-
-	  float dist = length(pos); // Distancia del fragmento
-	  vec3 wind = vec3(0.3, 0.0, 0.1) * (time/5000);
-	  float density = 0.1 * exp(-worldPos.y * 1.02); // Densidad de la niebla, que depende de la altura
-	  float f = exp(-density * dist) * fbm(worldPos * 1.5 + wind); // Factor de densidad de niebla en función de la distancia
-
-	  vec3 fogColor = vec3(0.4, 0.35, 0.5); 
-	  */
-
-	  vec3 color = shade(); // Guardamos los cálculos de la iluminación en una variable
-
 	  float fogHeight = 0.1;
 	  float fogThickness = 0.5;
 	  float heightFactor = 1.0 - smoothstep (fogHeight - fogThickness, fogHeight, worldPos.y);
@@ -93,6 +80,7 @@ void main()
 	  float f = exp(-density * dist);
 
 	  vec3 fogColor = vec3(0.4, 0.35, 0.5); 
+	  vec3 color = shade(); // Guardamos los cálculos de la iluminación en una variable
 
 	  //outColor = vec4(vec3(heightFactor), 1.0); //DEPURACIÓN -- DONDE SE CORTA LA NIEBLA
 	  outColor = vec4(mix(fogColor, color, f), 1.0);
@@ -116,7 +104,6 @@ vec3 phong (vec3 L, vec3 lD, vec3 lS) {
 		vec3 R = normalize(reflect(-L, N)); 
 
 		float factor = max(dot(V, R), 0.0); // Ángulo entre V y R
-
 		vec3 specular = lS * Ks * pow(factor, alpha);
 
 		c += specular;

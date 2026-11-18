@@ -45,10 +45,8 @@ vec3 shade();
 void main()
 {
 	// ------- Texturas ------- 
-
 	Ka = texture(auxiliarTex, coordTex).rgb;
 	Kd = texture(colorTex, coordTex).rgb;
-	//Ka = Kd;
 	Ks = texture(specularTex, coordTex).rgb;
 	Ke = texture(emiTex, coordTex).rgb;
 
@@ -66,12 +64,13 @@ void main()
 	outColor = vec4 (shade(), 1.0);
 }
 
+
 // Función auxiliar que calcula con una luz proveniente de la dirección L con intensidad difusa lD e especular lS
 vec3 phong (vec3 L, vec3 lD, vec3 lS) {
 
 	vec3 c = vec3 (0.0f);
 
-	// LUZ DIFUSA
+	// LUZ DIFUSA 
 	float dotNL = max (dot(N, L), 0.0); //Nos quedamos con el producto solo si es positivo
 	vec3 diffuse = lD * Kd * dotNL;
 

@@ -40,7 +40,6 @@ void main()
 {
 	Ka = texture(auxiliarTex, coordTex).rgb;
 	Kd = texture(colorTex, coordTex).rgb;
-	//Ka = Kd;
 	Ks = texture(specularTex, coordTex).rgb;
 	Ke = texture(emiTex, coordTex).rgb;
 
