@@ -1,0 +1,11 @@
+newmtl hojas
+Ka 0.1 0.1 0.1
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 40
+d 1.0
+illum 2
+map_Kd hojas_diffuse.png
+map_Ks hojas_specular.png
+map_Bump -bm 1.0 hojas_normal.png
+

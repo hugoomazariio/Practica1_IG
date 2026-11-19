@@ -1,0 +1,15 @@
+# Material de la farola (atlas unico 2048x2048)
+newmtl Farola
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 1.000 1.000 1.000
+Ke 1.000 1.000 1.000
+Ns 96.0
+Ni 1.45
+d 1.0
+illum 2
+map_Kd farola_diffuse.png
+map_Ks farola_specular.png
+map_Ke farola_emissive.png
+map_Bump -bm 1.0 farola_normal.png
+norm farola_normal.png

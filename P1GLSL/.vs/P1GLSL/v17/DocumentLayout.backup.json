@@ -3,26 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v8.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v6.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v5.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v4.frag||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|solutionrelative:scr\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{6FE709B3-0A7B-47F6-997A-A8B451E5B705}|P1GLSL.vcxproj|C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.vert||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,17 +20,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 275,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 0,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
               "RelativeDocumentMoniker": "scr\\main.cpp",
               "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\P1GLSL\\scr\\main.cpp",
               "RelativeToolTip": "scr\\main.cpp",
-              "ViewState": "AgIAANgBAAAAAAAAAAAAAOsBAACBAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAwBoAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-09-24T15:02:11.931Z",
               "IsPinned": true,
@@ -54,80 +42,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "shader.v9.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v9.frag",
-              "ViewState": "AgIAALQAAAAAAAAAAAAAAGEAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-18T00:26:58.525Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "shader.v7.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v7.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v7.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v7.frag",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAAAD8AAAAgAAAAAAAAAA==",
+              "Title": "shader.v9.vert",
+              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.vert",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.vert",
+              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.vert",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v9.vert",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABQAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-18T00:25:02.893Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "shader.v4.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v4.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v4.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v4.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v4.frag",
-              "ViewState": "AgIAABgAAAAAAAAAAAAAACgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-18T00:23:24.897Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "shader.v5.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v5.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v5.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v5.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v5.frag",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAAACkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-18T00:19:57.536Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "shader.v6.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v6.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v6.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v6.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v6.frag",
-              "ViewState": "AgIAAHUAAAAAAAAAAAAAAC0AAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-18T00:19:52.502Z",
+              "WhenOpened": "2026-11-18T12:34:51.427Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "shader.v8.frag",
-              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v8.frag",
-              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v8.frag",
-              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v8.frag",
-              "RelativeToolTip": "..\\shaders_P1\\shader.v8.frag",
-              "ViewState": "AgIAAFcAAAAAAAAAAAAAAGoAAAACAAAAAAAAAA==",
+              "Title": "shader.v9.frag",
+              "DocumentMoniker": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.frag",
+              "RelativeDocumentMoniker": "..\\shaders_P1\\shader.v9.frag",
+              "ToolTip": "C:\\Users\\paula\\Documents\\GitHub\\Practica1_IG\\shaders_P1\\shader.v9.frag",
+              "RelativeToolTip": "..\\shaders_P1\\shader.v9.frag",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAAwJYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-11-17T23:50:29.763Z",
+              "WhenOpened": "2026-11-18T00:26:58.525Z",
               "EditorCaption": ""
             }
           ]

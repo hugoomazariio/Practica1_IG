@@ -24,11 +24,11 @@ static unsigned int my_timer;
 //Variables para movimiento de objetos
 float fireflyAngle = 0.0f;
 float fireflyRadius = 0.5f;
-glm::vec3 centre = glm::vec3(0.0);
+glm::vec3 centre = glm::vec3(-0.4f, 0.0f, -2.0f);
 
 // Variables para movimiento de la cámara
-glm::vec3 cameraPos = glm::vec3(0.0f, 1.0f, 1.5f); // Posición de la cámara en el espacio
-glm::vec3 targetPos = glm::vec3(0.0f, 0.0f, -1.0f); // Hacia donde mira la cámara
+glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 2.0f); // Posición de la cámara en el espacio
+glm::vec3 targetPos = glm::vec3(0.0f, 1.0f, -1.0f); // Hacia donde mira la cámara
 glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); //Vector hacia arriba (eje Y positivo)
 
 float angHor = -90.0f; //Ángulo inicial de la cámara (horizontal). Comenzamos en -90 para que la cámara comience mirando hacia delante
@@ -61,8 +61,10 @@ std::vector<Model> models; //Todos los modelos de la escena
 
 //Índices de los modelos
 int fireflyIndex = -1;
-int bikeIndex = -1;
-int swordIndex = -1;
+
+// Texturas por defecto, por si el objeto cargado no tiene
+const std::string texBlackDefault = "../3D_assets/blackDefault.png";
+const std::string texNormalDefault = "../3D_assets/normalDefault.png";
 
 // ---------------------- Declaración de métodos ---------------------- 
 //Declaración de CB
@@ -88,6 +90,9 @@ void updateModel(const Model& m); //Envía la matriz de modelo a todas las malla
 bool DoTheImportThing(const std::string& pFile, float scaleValue, glm::vec3 position, glm::vec3 rotation, const std::string& colorTex, const std::string& emiTex = "",
 	const std::string& normalTex = "", const std::string& specularTex = "", const std::string& auxiliarTex = "");
 
+// Creación de una skybox de cielo nocturno
+void createSkybox();
+
 // ---------------------- Método main ----------------------
 int main(int argc, char** argv)
 {
@@ -108,22 +113,27 @@ int main(int argc, char** argv)
 	my_timer = 0; //Inicialización del timer
 	IGlib::setTimer(my_timer);
 
-	//Se pasa el .obj de los objetos que se quieren cargar, y si no se encuenta devuelve -1
-	//glm::vec3 posicionMoto = glm::vec3(0.0f, 0.0f, 0.0f);
-	//if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.5f, posicionMoto, glm::vec3(0.0f, -45.0f, 0.0f), "../3D_assets/Bike/Bike_Textures/Bike_D.png", "", "../3D_assets/Bike/Bike_Textures/Bike_NRM.png", "", "")) return -1;
-	//bikePos = posicionMoto; // Guardamos dinámicamente la posición para la luciérnaga
-	//bikeIndex = models.size() -1;
-
 	// Carga de objetos
+		// Moto
+	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.7f, glm::vec3(0.3f, 0.0f, -1.0f), glm::vec3(0.0, -30.0, 0.0f), "../3D_assets/Bike/Bike_Textures/Bike_Atlas_BaseColor.png",
+		"../3D_assets/Bike/Bike_Textures/Bike_Atlas_Emissive.png", "../3D_assets/Bike/Bike_Textures/Bike_Atlas_Normal.png",
+		"../3D_assets/Bike/Bike_Textures/Bike_Atlas_Specular.png", "../3D_assets/Bike/Bike_Textures/Bike_Atlas_Roughness.png")) return -1;
+		// Luciernaga
 	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png",
 		"../3D_assets/Firefly/Firefly_Textures/firefly_emissive.png", "../3D_assets/Firefly/Firefly_Textures/firefly_normal.png",
 		"../3D_assets/Firefly/Firefly_Textures/firefly_bump.png", "../3D_assets/Firefly/Firefly_Textures/firefly_opacity.png")) return -1;
 	fireflyIndex = models.size() - 1;
-
-	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 1.0f, glm::vec3(0.0f, -0.4f, 0.0f), glm::vec3(-10.0f, 0.0f, -15.0f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg",
+		// Espada
+	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 1.0f, glm::vec3(0.49f, 0.0f, -0.25f), glm::vec3(-10.0f, 0.0f, 15.0f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg",
 		"../3D_assets/Sword/Sword_Textures/Espada_Emissive.jpeg", "../3D_assets/Sword/Sword_Textures/Espada_Normal.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Specular.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Roughness.jpg")) return -1;
-	swordIndex = models.size() - 1;
+		// Farola
+	if (!DoTheImportThing("../3D_assets/Lamp/lamp.obj", 0.37f, glm::vec3(-1.6f, 0.0f, 0.0f), glm::vec3(0.0f, 180.0f, 0.0f), "../3D_assets/Lamp/Lamp_Textures/lamp_diffuse.png",
+		"../3D_assets/Lamp/Lamp_Textures/lamp_emissive.png", "../3D_assets/Lamp/Lamp_Textures/lamp_normal.png", "../3D_assets/Lamp/Lamp_Textures/lamp_specular.png","")) return -1;
+		// Arbusto
+	if (!DoTheImportThing("../3D_assets/Bush/bush.obj", 0.8f, glm::vec3(-0.4f, 0.0f, -2.5f), glm::vec3(0.0f, 0.0f, 0.0f), "../3D_assets/Bush/Bush_Textures/bush_diffuse.png",
+		"", "../3D_assets/Bush/Bush_Textures/bush_normal.png", "../3D_assets/Bush/Bush_Textures/bush_specular.png", "")) return -1;
 
+	createSkybox();
 
 	// CBs (Callbacks)
 	IGlib::setResizeCB(resizeFunc);
@@ -157,7 +167,6 @@ void idleFunc()
 	my_timer++;
 	IGlib::setTimer(my_timer);
 
-
 	//Movimiento de la luciérnaga (que depende del tiempo)
 	fireflyAngle = fmod(my_timer * 0.001f, 2.0f * M_PI);
 
@@ -175,10 +184,6 @@ void idleFunc()
 		models[fireflyIndex].rotation.y = -glm::degrees(fireflyAngle) - 90.0f; //Hacemos que la luciernaga mire hacia donde vuela (+90 para incluir un desfase; sino, vuela de lado)
 		updateModel(models[fireflyIndex]);
 	}
-
-	// DEPURACIÓN PARA ILUMINACIÓN -- BORRAR DESPUES
-	models[swordIndex].rotation.y += 0.01f;
-	updateModel(models[swordIndex]);
 }
 
 void keyboardFunc(unsigned char key, int x, int y)
@@ -482,8 +487,12 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 		IGlib::addColorTex(id, colorTex.c_str()); //Textura de color (difusa) de todas las mallas del modelo
 		if (!emiTex.empty())
 			IGlib::addEmissiveTex(id, emiTex.c_str());
+		else
+			IGlib::addEmissiveTex(id, texBlackDefault.c_str());
 		if (!normalTex.empty())
 			IGlib::addNormalTex(id, normalTex.c_str());
+		else
+			IGlib::addNormalTex(id, texNormalDefault.c_str());
 		if (!specularTex.empty())
 			IGlib::addSpecularTex(id, specularTex.c_str());
 		if (!auxiliarTex.empty())
@@ -505,7 +514,6 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 	return true;
 }
 
-
 // ---------------------- MATRIZ DE MODELO ----------------------
 glm::mat4 modelMatrix(const Model& m) {
 	glm::mat4 mat = glm::translate(glm::mat4(1.0f), m.position); // Traslación
@@ -520,4 +528,34 @@ void updateModel(const Model& m) {
 	glm::mat4 mat = modelMatrix(m);
 	for (size_t i = 0; i < m.ids.size(); ++i) //Todas las mallas del modelo comparten la misma matriz
 		IGlib::setModelMat(m.ids[i], mat);
+}
+
+void createSkybox() {
+		// Copiamos los indices y los giramos (0,1,2 -> 0,2,1) para que las caras miren hacia dentro
+		std::vector<unsigned int> indices(cubeTriangleIndex, cubeTriangleIndex + cubeNTriangleIndex * 3);
+		for (size_t i = 0; i < indices.size(); i += 3)
+			std::swap(indices[i + 1], indices[i + 2]);
+
+		// Normales hacia dentro
+		std::vector<float> normales(cubeVertexNormal, cubeVertexNormal + cubeNVertex * 3);
+		for (float& n : normales)
+			n = -n;
+
+		int id = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, indices.data(),
+			cubeVertexPos, cubeVertexColor, normales.data(), cubeVertexTexCoord, cubeVertexTangent);
+
+	// Texturas 
+		IGlib::addColorTex(id, texBlackDefault.c_str());
+		IGlib::addAuxiliarTex(id, texBlackDefault.c_str());
+		IGlib::addEmissiveTex(id, "../3D_assets/nightSky.png");
+		IGlib::addSpecularTex(id, texBlackDefault.c_str());
+		IGlib::addNormalTex(id, texNormalDefault.c_str());
+
+	Model caja;
+	caja.ids.push_back(id);
+	caja.position = glm::vec3(0.0f);
+	caja.rotation = glm::vec3(0.0f);
+	caja.scale = glm::vec3(15.0f);
+	models.push_back(caja);
+	updateModel(caja);
 }

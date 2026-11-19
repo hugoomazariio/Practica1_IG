@@ -31,9 +31,9 @@ vec3 N; // Normal
 float alpha = 80.0; // Exponente de brillo
 
 // Propiedades de la luz
-vec3 Ia = vec3(0.2, 0.05, 0.2); // Intensidad de luz ambiental
-vec3 Id = vec3(0.1, 0.0, 0.7); // Intensidad de luz difusa
-vec3 Is = vec3(1.0, 0.5, 0.8); // Intensidad de luz especular
+vec3 Ia = vec3(0.15, 0.15, 0.2); // Intensidad de luz ambiental
+//vec3 Id = vec3(0.3, 0.1, 0.7); // Intensidad de luz difusa
+//vec3 Is = vec3(1.0, 0.5, 0.8); // Intensidad de luz especular
 
 vec3 lPos = vec3 (0.0, 2.0, 0.0); // Posición de la luz
 
@@ -68,7 +68,7 @@ void main()
 	 N = normalize (TBN * normTex);
 
 	 // ------- Niebla ------- 
-	  float fogHeight = 0.1;
+	  float fogHeight = 0.6;
 	  float fogThickness = 0.5;
 	  float heightFactor = 1.0 - smoothstep (fogHeight - fogThickness, fogHeight, worldPos.y);
 
@@ -79,12 +79,19 @@ void main()
 	  float dist = length(pos);
 	  float f = exp(-density * dist);
 
-	  vec3 fogColor = vec3(0.4, 0.35, 0.5); 
+	  float background = smoothstep(8.0, 14.0, dist);
+	  background *= 1.0 - smoothstep(1.0, 4.0, worldPos.y); // Por encima de y = 6 ya no hay niebla de fondo
+	  f = min(f, 1.0 - background);
+
+	  vec3 fogColor = vec3(0.06, 0.03, 0.1); 
 	  vec3 color = shade(); // Guardamos los cálculos de la iluminación en una variable
 
 	  //outColor = vec4(vec3(heightFactor), 1.0); //DEPURACIÓN -- DONDE SE CORTA LA NIEBLA
 	  outColor = vec4(mix(fogColor, color, f), 1.0);
 }
+
+ //outColor = vec4(vec3(heightFactor), 1.0); //DEPURACIÓN -- DONDE SE CORTA LA NIEBLA
+	 // outColor = vec4(mix(fogColor, color, f), 1.0);
 
 // --------------- Iluminación --------------- 
 // Función auxiliar que calcula con una luz proveniente de la dirección L con intensidad difusa lD e especular lS y cel-shading
@@ -115,20 +122,27 @@ vec3 phong (vec3 L, vec3 lD, vec3 lS) {
 	return c;
 }
 
+// Cálculo de color debido a las luces
 vec3 shade() {
-
 	vec3 c = vec3(0.0); 
+
 	// LUZ AMBIENTAL (Solo lo calculamos una vez, dado que aplica a toda la escena por igual)
 	c += Ia * Ka;
 
-	// LUZ DIRECCIONAL
-	vec3 direcDirectionLight = normalize(vec3 (-1.0, -1.0, -1.0)); //Es la misma para cualquier objeto
-	direcDirectionLight = (view * vec4(direcDirectionLight, 0.0)).xyz; //Lo pasamos a coordenadas de cámara
-	c += phong (-direcDirectionLight, vec3(0.0, 0.0, 0.4), vec3(0.0, 0.0, 0.6)); // L = -D
+	// LUCES DIRECCIONALES
+		// -- Simulación de luz de la luna --
+	vec3 direcMoonlight = normalize(vec3 (-0.5, -1.0, -0.3)); //Es la misma para cualquier objeto
+	direcMoonlight = (view * vec4(direcMoonlight, 0.0)).xyz; //Lo pasamos a coordenadas de cámara
+	c += phong (-direcMoonlight, vec3(0.35, 0.4, 0.6), vec3(0.5, 0.55, 0.7)); // L = -D
+
+		// -- "Rim light" -- 
+	vec3 direcRimLight = normalize(vec3 (0.45, -0.2, 1.0)); //La dejamos en coordenadas de cámara para que siempre se sitúe detrás de los objetos
+	c += phong (-direcRimLight, vec3(0.2, 0.6, 0.9), vec3(0.3, 0.5, 1.0));
+
 
 	// LUZ PUNTUAL (luciérnaga)
 	float angFirefly = mod(time * 0.001f, 2.0 * M_PI); //Ángulo de movimiento de la luciernaga
-	vec3 centre = vec3(0.0, 0.0, 0.0); //Posición de la moto
+	vec3 centre = vec3(-0.4f, 0.0f, -2.0f); //Centro de la órbita
 	float radius = 0.5f; //Radio de la óribita de la luciernaga
 
 	float flickVel = time / 5000.0; //Dividimos el tiempo para que el parpadeo no vaya demasiado rápido
@@ -142,8 +156,6 @@ vec3 shade() {
 								centre.y + 1.0 + sin(angFirefly * 3.0) * 0.3,
 								centre.z + sin(angFirefly) * radius);
 
-	//vec3 posLightFirefly = vec3 (0.0, 0.5, 0.0); //DEPURACIÓN -- QUITAR LUEGO Y DESCOMENTAR LA POSICIÓN REAL
-
 	vec3 posLFireflyCam = (view * vec4(posLightFirefly, 1.0)).xyz; //Lo pasamos a coordenadas de cámara
 	vec3 LL = (posLFireflyCam - pos); //Vector de luz
 
@@ -152,8 +164,9 @@ vec3 shade() {
 
 	c += phong (normalize(LL), fireflyColor * atenuationL, fireflyColor * atenuationL);
 
+
 	// LUZ FOCAL
-	vec3 posFocalLight = vec3 (0.0, 1.0, 0.0);
+	vec3 posFocalLight = vec3 (0.0, 2.0, 0.0);
 	posFocalLight = (view * vec4(posFocalLight, 1.0)).xyz;
 
 	vec3 direcFocalLight = vec3 (0.0, -1.0, 0.0);
@@ -167,7 +180,7 @@ vec3 shade() {
 	
 	float foco = smoothstep(cos(radians(penumbra)), cos(radians(corte)), cosAngle); //Realizamos una interpolación para suavizar la luz
 
-	c += phong(normalize(LF), vec3(0.4, 0.5, 0.0) * foco, vec3(1.0) * foco);
+	c += phong(normalize(LF), vec3(0.55, 0.6, 0.1) * foco, vec3(0.75) * foco);
 
 	// COMPONENTE EMISIVA (solo una vez)
 	c += Ke;
@@ -191,7 +204,6 @@ float valueNoise(vec3 p) {
 	               mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
 	           mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
 	               mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
-
 }
 
 float fbm (vec3 p) {

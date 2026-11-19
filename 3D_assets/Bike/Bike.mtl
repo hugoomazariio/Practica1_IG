@@ -1,24 +1,22 @@
-# Blender 5.1.2 MTL File: 'Model.blend'
-# www.blender.org
+# Bike - material unico con atlas de texturas (moto + cristal)
+# Texturas PBR: BaseColor, Normal, Roughness, Metallic, Specular, Emissive, Opacity
 
-newmtl Model001_Material001
+newmtl Bike_Atlas
 Ns 250.000000
-Ka 0.500000 0.500000 0.500000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 3
-map_Kd textures/T_KanedaBike_D.png
-map_Bump textures/T_KanedaBike_NRM.png
-
-newmtl Model001_Material002
-Ns 1000.000000
 Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
-illum 3
-map_Kd textures/glass_Dd.png
-map_Bump textures/glass_N.png
+Pr 1.000000
+Pm 1.000000
+illum 2
+map_Kd textures/Bike_Atlas_BaseColor.png
+map_Ks textures/Bike_Atlas_Specular.png
+map_Ke textures/Bike_Atlas_Emissive.png
+map_Pr textures/Bike_Atlas_Roughness.png
+map_Pm textures/Bike_Atlas_Metallic.png
+map_d textures/Bike_Atlas_Opacity.png
+map_Bump -bm 1.000000 textures/Bike_Atlas_Normal.png
+norm textures/Bike_Atlas_Normal.png
