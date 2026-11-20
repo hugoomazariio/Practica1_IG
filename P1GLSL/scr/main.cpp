@@ -1,6 +1,8 @@
 #include "BOX.h"
 #include <IGL/IGlib.h>
 #include <vector>
+#include <cfloat>     // FLT_MAX: límites de las cajas envolventes para selección
+#include <cmath>      // Funciones trigonométricas usadas en las animaciones y la cámara
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -46,21 +48,40 @@ bool rightClicPressed; // Detecta si se está pulsando el clic derecho para el m
 
 // Variables para zoom
 float fov = 60.0f; //Ángulo inicial de visión
-float aspectRatio; //Proporción de la ventana (ancho-alto)
+float aspectRatio = 4.0f / 3.0f; //Valor inicial; se actualiza al redimensionar la ventana
+
+// Copias de las matrices y dimensiones de ventana necesarias para seleccionar objetos
+glm::mat4 viewMat = glm::mat4(1.0f);
+glm::mat4 projMat = glm::mat4(1.0f);
+int anchoVentana = 800;
+int altoVentana = 600;
 
 // Modelos cargados
 // Un modelo cargado puede tener varias mallas (una por material), así que se guardan todas juntas
 struct Model {
-	std::vector<int> ids; //IDs de las mallas (los que devuelve createObj)
-	glm::vec3 position; //Dónde está el modelo en el mundo
-	glm::vec3 scale; //Escala en cada eje
-	glm::vec3 rotation; //Rotación sobre cada eje
+	std::vector<int> ids; // Todas las mallas de un mismo modelo
+	glm::vec3 position;   // Posición actual
+	glm::vec3 scale;      // Escala actual
+	glm::vec3 rotation;   // Rotación base de la práctica 2 (ángulos de Euler en grados)
+
+	glm::mat4 editRotation = glm::mat4(1.0f); // Giros del editor sobre los ejes locales
+	glm::vec3 originalPosition = glm::vec3(0.0f);
+	float originalScale = 1.0f;
+	glm::vec3 boundsMin = glm::vec3(FLT_MAX);  // Caja en espacio local
+	glm::vec3 boundsMax = glm::vec3(-FLT_MAX);
+	bool selectable = true; // La skybox no se debe poder seleccionar
 };
 
-std::vector<Model> models; //Todos los modelos de la escena
+std::vector<Model> models; // Todos los modelos de la escena
 
-//Índices de los modelos
+// Índice del modelo animado
 int fireflyIndex = -1;
+
+int seleccionado = -1; // -1 indica que no hay ningún objeto seleccionado
+bool modoEscalado = false;
+bool modoRotacion = false;
+bool modoTraslacion = false;
+int ejeEscalado = 0; // 0 = XYZ para escalado; 1 = X, 2 = Y, 3 = Z
 
 // Texturas por defecto, por si el objeto cargado no tiene
 const std::string texBlackDefault = "../3D_assets/blackDefault.png";
@@ -85,6 +106,13 @@ void updateProjectionMatrix(); //Para actualizar los datos de la matriz de proye
 //Matriz de modelo
 glm::mat4 modelMatrix(const Model& m); //Matriz de modelo
 void updateModel(const Model& m); //Envía la matriz de modelo a todas las mallas del modelo
+
+void seleccionarObjeto(int mx, int my);
+bool teclaEditor(unsigned char key);
+void escalarSeleccionado(float factor);
+void rotarSeleccionado(float grados);
+void trasladarSeleccionado(float distancia);
+bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t);
 
 // Carga de objetos
 bool DoTheImportThing(const std::string& pFile, float scaleValue, glm::vec3 position, glm::vec3 rotation, const std::string& colorTex, const std::string& emiTex = "",
@@ -118,18 +146,18 @@ int main(int argc, char** argv)
 	if (!DoTheImportThing("../3D_assets/Bike/Bike.obj", 0.7f, glm::vec3(0.3f, 0.0f, -1.0f), glm::vec3(0.0, -30.0, 0.0f), "../3D_assets/Bike/Bike_Textures/Bike_Atlas_BaseColor.png",
 		"../3D_assets/Bike/Bike_Textures/Bike_Atlas_Emissive.png", "../3D_assets/Bike/Bike_Textures/Bike_Atlas_Normal.png",
 		"../3D_assets/Bike/Bike_Textures/Bike_Atlas_Specular.png", "../3D_assets/Bike/Bike_Textures/Bike_Atlas_Roughness.png")) return -1;
-		// Luciernaga
+	// Luciernaga
 	if (!DoTheImportThing("../3D_assets/Firefly/Firefly.obj", 0.02f, glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), "../3D_assets/Firefly/Firefly_Textures/firefly_albedo.png",
 		"../3D_assets/Firefly/Firefly_Textures/firefly_emissive.png", "../3D_assets/Firefly/Firefly_Textures/firefly_normal.png",
 		"../3D_assets/Firefly/Firefly_Textures/firefly_bump.png", "../3D_assets/Firefly/Firefly_Textures/firefly_opacity.png")) return -1;
 	fireflyIndex = models.size() - 1;
-		// Espada
+	// Espada
 	if (!DoTheImportThing("../3D_assets/Sword/Sword.obj", 1.0f, glm::vec3(0.49f, 0.0f, -0.25f), glm::vec3(-10.0f, 0.0f, 15.0f), "../3D_assets/Sword/Sword_Textures/Espada_Diffuse.jpg",
 		"../3D_assets/Sword/Sword_Textures/Espada_Emissive.jpeg", "../3D_assets/Sword/Sword_Textures/Espada_Normal.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Specular.jpg", "../3D_assets/Sword/Sword_Textures/Espada_Roughness.jpg")) return -1;
-		// Farola
+	// Farola
 	if (!DoTheImportThing("../3D_assets/Lamp/lamp.obj", 0.37f, glm::vec3(-1.6f, 0.0f, 0.0f), glm::vec3(0.0f, 180.0f, 0.0f), "../3D_assets/Lamp/Lamp_Textures/lamp_diffuse.png",
-		"../3D_assets/Lamp/Lamp_Textures/lamp_emissive.png", "../3D_assets/Lamp/Lamp_Textures/lamp_normal.png", "../3D_assets/Lamp/Lamp_Textures/lamp_specular.png","")) return -1;
-		// Arbusto
+		"../3D_assets/Lamp/Lamp_Textures/lamp_emissive.png", "../3D_assets/Lamp/Lamp_Textures/lamp_normal.png", "../3D_assets/Lamp/Lamp_Textures/lamp_specular.png", "")) return -1;
+	// Arbusto
 	if (!DoTheImportThing("../3D_assets/Bush/bush.obj", 0.8f, glm::vec3(-0.4f, 0.0f, -2.5f), glm::vec3(0.0f, 0.0f, 0.0f), "../3D_assets/Bush/Bush_Textures/bush_diffuse.png",
 		"", "../3D_assets/Bush/Bush_Textures/bush_normal.png", "../3D_assets/Bush/Bush_Textures/bush_specular.png", "")) return -1;
 
@@ -158,6 +186,8 @@ void resizeFunc(int width, int height)
 		height = 1; //Para evitar divisiones entre 0
 
 	aspectRatio = (float)width / (float)height; //Para guardar el ratio de la cámara (matriz de proyección)
+	anchoVentana = width;
+	altoVentana = height;
 	updateProjectionMatrix();
 }
 
@@ -188,6 +218,11 @@ void idleFunc()
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
+	// El editor procesa primero sus teclas para evitar conflictos con la cámara
+	if (teclaEditor(key)) {
+		return;
+	}
+
 	//MOVIMIENTO DE LA CÁMARA MEDIANTE TECLADO
 	float cameraSpeed = 0.5f; //Distancia que sumamos o restamos para mover la cámara
 	float rotationSpeed = 5.0f; //Ángulo que sumamos o restamos para girar la cámara
@@ -245,6 +280,9 @@ void mouseFunc(int button, int state, int x, int y)
 		rightClicPressed = (state == 0);
 		firstMouse = true;
 	}
+	if (button == 0 && state == 0) { // Clic izquierdo: selección del objeto
+		seleccionarObjeto(x, y);
+	}
 }
 
 
@@ -300,8 +338,7 @@ void mouseMoveFunc(int x, int y)
 	updateCameraVectors();
 }
 
-void mousePassMoveFunc(int x, int y)
-{ }
+void mousePassMoveFunc(int x, int y){}
 
 void mouseWheelFunc(int wheel, int dir, int x, int y)
 {
@@ -328,6 +365,7 @@ void mouseWheelFunc(int wheel, int dir, int x, int y)
 void updateCameraVectors() {
 	glm::mat4 view = lookAtMatrix(cameraPos, targetPos, upVector);
 	IGlib::setViewMat(view);
+	viewMat = view; // Matriz usada por el picking
 }
 
 glm::mat4 lookAtMatrix(glm::vec3 pos, glm::vec3 target, glm::vec3 up) {
@@ -376,6 +414,7 @@ void updateProjectionMatrix() {
 	proj[3].w = 0.0;
 
 	IGlib::setProjMat(proj);
+	projMat = proj; // Matriz usada por el picking
 }
 
 // ---------------------- CARGA DE OBJETOS ----------------------
@@ -388,7 +427,7 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 	Assimp::Importer importer;
 	sc = importer.ReadFile(pFile,
 		aiProcess_CalcTangentSpace |
-		aiProcess_Triangulate | 
+		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_SortByPType);
 
@@ -402,6 +441,8 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 
 	// Un modelo puede tener varias mallas (una por material): las agrupamos 
 	Model modelo;
+	modelo.boundsMin = glm::vec3(FLT_MAX);
+	modelo.boundsMax = glm::vec3(-FLT_MAX);
 
 	// Bucle de carga
 	for (unsigned int n = 0; n < sc->mNumMeshes; ++n) {
@@ -501,12 +542,24 @@ bool DoTheImportThing(const std::string& pFile, float valorEscalado, glm::vec3 p
 			IGlib::addAuxiliarTex(id, colorTex.c_str()); // Si no hay textura auxiliar, usamos el color (para la iluminación en el shader)
 
 		modelo.ids.push_back(id); //Guardamos el ID de cada malla
+
+		// Ampliamos la AABB local con los vértices de todas las mallas del modelo
+		if (mesh->HasPositions()) {
+			for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+				glm::vec3 v(mesh->mVertices[k].x, mesh->mVertices[k].y, mesh->mVertices[k].z);
+				modelo.boundsMin = glm::min(modelo.boundsMin, v);
+				modelo.boundsMax = glm::max(modelo.boundsMax, v);
+			}
+		}
 	}
 
 	//Para que los objetos queden donde estaban, multiplicamos la posición por la escala y usamos traslación * rotación * escalado
 	modelo.position = position * valorEscalado;
 	modelo.rotation = rotacion;
 	modelo.scale = glm::vec3(valorEscalado, valorEscalado, valorEscalado);
+	modelo.originalPosition = modelo.position;
+	modelo.originalScale = valorEscalado;
+	modelo.editRotation = glm::mat4(1.0f);
 
 	models.push_back(modelo);
 	updateModel(modelo); //Dibuja el objeto en la posicion y escalado que se le ha dado antes
@@ -520,6 +573,7 @@ glm::mat4 modelMatrix(const Model& m) {
 	mat = glm::rotate(mat, glm::radians(m.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación (X)
 	mat = glm::rotate(mat, glm::radians(m.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación (Y)
 	mat = glm::rotate(mat, glm::radians(m.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Rotación (Z)
+	mat = mat * m.editRotation; // Rotación interactiva local sin perder la rotación inicial o animada
 	mat = glm::scale(mat, m.scale); // Escalado
 	return mat;
 }
@@ -531,31 +585,207 @@ void updateModel(const Model& m) {
 }
 
 void createSkybox() {
-		// Copiamos los indices y los giramos (0,1,2 -> 0,2,1) para que las caras miren hacia dentro
-		std::vector<unsigned int> indices(cubeTriangleIndex, cubeTriangleIndex + cubeNTriangleIndex * 3);
-		for (size_t i = 0; i < indices.size(); i += 3)
-			std::swap(indices[i + 1], indices[i + 2]);
+	// Copiamos los indices y los giramos (0,1,2 -> 0,2,1) para que las caras miren hacia dentro
+	std::vector<unsigned int> indices(cubeTriangleIndex, cubeTriangleIndex + cubeNTriangleIndex * 3);
+	for (size_t i = 0; i < indices.size(); i += 3)
+		std::swap(indices[i + 1], indices[i + 2]);
 
-		// Normales hacia dentro
-		std::vector<float> normales(cubeVertexNormal, cubeVertexNormal + cubeNVertex * 3);
-		for (float& n : normales)
-			n = -n;
+	// Normales hacia dentro
+	std::vector<float> normales(cubeVertexNormal, cubeVertexNormal + cubeNVertex * 3);
+	for (float& n : normales)
+		n = -n;
 
-		int id = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, indices.data(),
-			cubeVertexPos, cubeVertexColor, normales.data(), cubeVertexTexCoord, cubeVertexTangent);
+	int id = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, indices.data(),
+		cubeVertexPos, cubeVertexColor, normales.data(), cubeVertexTexCoord, cubeVertexTangent);
 
 	// Texturas 
-		IGlib::addColorTex(id, texBlackDefault.c_str());
-		IGlib::addAuxiliarTex(id, texBlackDefault.c_str());
-		IGlib::addEmissiveTex(id, "../3D_assets/nightSky.png");
-		IGlib::addSpecularTex(id, texBlackDefault.c_str());
-		IGlib::addNormalTex(id, texNormalDefault.c_str());
+	IGlib::addColorTex(id, texBlackDefault.c_str());
+	IGlib::addAuxiliarTex(id, texBlackDefault.c_str());
+	IGlib::addEmissiveTex(id, "../3D_assets/nightSky.png");
+	IGlib::addSpecularTex(id, texBlackDefault.c_str());
+	IGlib::addNormalTex(id, texNormalDefault.c_str());
 
 	Model caja;
 	caja.ids.push_back(id);
 	caja.position = glm::vec3(0.0f);
 	caja.rotation = glm::vec3(0.0f);
 	caja.scale = glm::vec3(15.0f);
+	caja.selectable = false; // No permitir que la skybox tape la selección de objetos
 	models.push_back(caja);
 	updateModel(caja);
+}
+
+// ---------------------- Editor de objetos ----------------------
+void seleccionarObjeto(int mx, int my) {
+	//Convertimos el pixel del clic en un rayo: píxeles -> coordenadas de -1 a 1 -> mundo (deshaciendo proyección y vista)
+	float nx = 2.0f * mx / anchoVentana - 1.0f;
+	float ny = 1.0f - 2.0f * my / altoVentana; //En la ventana Y crece hacia abajo, en OpenGL hacia arriba
+	glm::mat4 inversa = glm::inverse(projMat * viewMat);
+	glm::vec4 cercano = inversa * glm::vec4(nx, ny, -1.0f, 1.0f); //Punto del rayo en el plano near
+	glm::vec4 lejano = inversa * glm::vec4(nx, ny, 1.0f, 1.0f); //Punto del rayo en el plano far
+	glm::vec3 origen = glm::vec3(cercano) / cercano.w;
+	glm::vec3 dir = glm::vec3(lejano) / lejano.w - origen; //Sin normalizar: t = 0 en near y t = 1 en far
+
+	int elegido = -1;
+	float mejorT = 2.0f;
+	for (size_t i = 0; i < models.size(); ++i) {
+		if (!models[i].selectable || models[i].ids.empty()) continue; // Ignorar la skybox y modelos vacíos
+		//Pasamos el rayo al espacio del propio modelo: así la caja siempre está alineada con los ejes, aunque el modelo esté escalado
+		glm::mat4 inv = glm::inverse(modelMatrix(models[i]));
+		glm::vec3 oLocal = glm::vec3(inv * glm::vec4(origen, 1.0f));
+		glm::vec3 dLocal = glm::vec3(inv * glm::vec4(dir, 0.0f));
+		float t;
+		if (rayoCaja(oLocal, dLocal, models[i].boundsMin, models[i].boundsMax, t) && t < mejorT) {
+			mejorT = t; //Nos quedamos con el modelo más cercano a la cámara
+			elegido = (int)i;
+		}
+	}
+
+	seleccionado = elegido;
+	ejeEscalado = 0;
+	if (seleccionado < 0) {
+		modoEscalado = false;
+		modoRotacion = false;
+		modoTraslacion = false;
+		std::cout << "Nada seleccionado" << std::endl;
+	}
+	else {
+		std::cout << "Seleccionado el modelo " << seleccionado << " (pulsa 1 para escalar, 2 para rotar o 3 para mover)" << std::endl;
+	}
+}
+
+bool teclaEditor(unsigned char key) {
+	if (key == '1') { //Activa el modo escalado
+		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
+		modoEscalado = true;
+		modoRotacion = false;
+		modoTraslacion = false;
+		ejeEscalado = 0; //Al escalar, por defecto se escalan los tres ejes
+		std::cout << "Modo escalado: + y - para cambiar el tamaño, X/Y/Z para elegir eje, R para resetear" << std::endl;
+		return true;
+	}
+
+	if (key == '2') { //Activa el modo rotación
+		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
+		modoRotacion = true;
+		modoEscalado = false;
+		modoTraslacion = false;
+		if (ejeEscalado == 0) ejeEscalado = 2; //Al rotar, por defecto se gira sobre el eje Y
+		std::cout << "Modo rotacion: + y - para girar, X/Y/Z para elegir eje, R para resetear" << std::endl;
+		return true;
+	}
+
+	if (key == '3') { //Activa el modo traslación
+		if (seleccionado < 0) { std::cout << "Selecciona primero un objeto con el clic izquierdo" << std::endl; return true; }
+		modoTraslacion = true;
+		modoEscalado = false;
+		modoRotacion = false;
+		if (ejeEscalado == 0) ejeEscalado = 1; //Al mover, por defecto se mueve sobre el eje X
+		std::cout << "Modo traslacion: + y - para mover, X/Y/Z para elegir eje, R para resetear" << std::endl;
+		return true;
+	}
+
+	if (key == 'x' || key == 'X' || key == 'y' || key == 'Y' || key == 'z' || key == 'Z') { //Elegir el eje
+		if (seleccionado < 0) return true;
+		int eje = (key == 'x' || key == 'X') ? 1 : ((key == 'y' || key == 'Y') ? 2 : 3);
+		if (modoRotacion || modoTraslacion)
+			ejeEscalado = eje; //Al rotar siempre hace falta un eje concreto
+		else
+			ejeEscalado = (ejeEscalado == eje) ? 0 : eje; //Al escalar, pulsar el mismo eje otra vez vuelve a los tres
+		const char* nombres[] = { "XYZ", "X", "Y", "Z" };
+		std::cout << "Eje: " << nombres[ejeEscalado] << std::endl;
+		return true;
+	}
+
+	if (key == '+' || key == '=') { //Agrandar o girar en un sentido (el '=' es la misma tecla que '+' sin pulsar mayúsculas)
+		if (seleccionado >= 0 && modoEscalado) escalarSeleccionado(1.1f);
+		if (seleccionado >= 0 && modoRotacion) rotarSeleccionado(5.0f);
+		if (seleccionado >= 0 && modoTraslacion) trasladarSeleccionado(0.25f);
+		return true;
+	}
+
+	if (key == '-' || key == '_') { //Reducir o girar en sentido contrario
+		if (seleccionado >= 0 && modoEscalado) escalarSeleccionado(1.0f / 1.1f);
+		if (seleccionado >= 0 && modoRotacion) rotarSeleccionado(-5.0f);
+		if (seleccionado >= 0 && modoTraslacion) trasladarSeleccionado(-0.25f);
+		return true;
+	}
+
+	if (key == 'r' || key == 'R') { //Volver al valor original de lo que se está editando
+		if (seleccionado < 0) return true;
+		if (modoRotacion) {
+			models[seleccionado].editRotation = glm::mat4(1.0f); //Sin rotación
+		}
+		else if (modoTraslacion) {
+			models[seleccionado].position = models[seleccionado].originalPosition; //Posición original
+		}
+		else {
+			float original = models[seleccionado].originalScale; //Escala con la que se cargó el modelo
+			models[seleccionado].scale = glm::vec3(original);
+		}
+		updateModel(models[seleccionado]);
+		return true;
+	}
+
+	return false; //No es una tecla del editor: la usa la cámara
+}
+
+void escalarSeleccionado(float factor) {
+	float minimo = models[seleccionado].originalScale / 20.0f; //Límites relativos a la escala de carga: entre 1/20 y 20 veces,
+	float maximo = models[seleccionado].originalScale * 20.0f; //para que el objeto no desaparezca ni sea gigante
+	glm::vec3& e = models[seleccionado].scale;
+	if (ejeEscalado == 0 || ejeEscalado == 1) e.x = glm::clamp(e.x * factor, minimo, maximo);
+	if (ejeEscalado == 0 || ejeEscalado == 2) e.y = glm::clamp(e.y * factor, minimo, maximo);
+	if (ejeEscalado == 0 || ejeEscalado == 3) e.z = glm::clamp(e.z * factor, minimo, maximo);
+	updateModel(models[seleccionado]);
+	std::cout << "Escala: (" << e.x << ", " << e.y << ", " << e.z << ")" << std::endl;
+}
+
+void rotarSeleccionado(float grados) {
+	glm::vec3 eje(0.0f, 1.0f, 0.0f); //Por defecto, eje Y
+	if (ejeEscalado == 1) eje = glm::vec3(1.0f, 0.0f, 0.0f);
+	if (ejeEscalado == 3) eje = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	//Acumulamos el giro sobre los ejes del propio objeto (multiplicando por la derecha), igual que el escalado
+	glm::mat4 giro = glm::rotate(glm::mat4(1.0f), glm::radians(grados), eje);
+	models[seleccionado].editRotation = models[seleccionado].editRotation * giro;
+	updateModel(models[seleccionado]);
+	std::cout << "Rotado " << grados << " grados" << std::endl;
+}
+
+void trasladarSeleccionado(float distancia) {
+	if (seleccionado == fireflyIndex) { //idleFunc recoloca la luciérnaga en cada frame, así que no se puede mover a mano
+		std::cout << "La luciernaga se mueve sola alrededor de la moto, no se puede trasladar" << std::endl;
+		return;
+	}
+
+	glm::vec3 eje(1.0f, 0.0f, 0.0f); //Por defecto, eje X
+	if (ejeEscalado == 2) eje = glm::vec3(0.0f, 1.0f, 0.0f);
+	if (ejeEscalado == 3) eje = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	//Se mueve sobre los ejes del mundo (no los del objeto, que puede estar rotado)
+	glm::vec3& p = models[seleccionado].position;
+	p += eje * distancia;
+	updateModel(models[seleccionado]);
+	std::cout << "Posicion: (" << p.x << ", " << p.y << ", " << p.z << ")" << std::endl;
+}
+
+//Intersección entre el rayo (o + t*d, con t entre 0 y 1) y una caja alineada con los ejes
+bool rayoCaja(glm::vec3 o, glm::vec3 d, glm::vec3 bmin, glm::vec3 bmax, float& t) {
+	float tmin = 0.0f, tmax = 1.0f;
+	for (int i = 0; i < 3; ++i) { //Un par de planos por cada eje
+		if (fabs(d[i]) < 1e-8f) {
+			if (o[i] < bmin[i] || o[i] > bmax[i]) return false; //Rayo paralelo a los planos y fuera de ellos
+		}
+		else {
+			float t1 = (bmin[i] - o[i]) / d[i];
+			float t2 = (bmax[i] - o[i]) / d[i];
+			if (t1 > t2) { float aux = t1; t1 = t2; t2 = aux; }
+			if (t1 > tmin) tmin = t1;
+			if (t2 < tmax) tmax = t2;
+			if (tmin > tmax) return false; //Los intervalos no se solapan: el rayo no toca la caja
+		}
+	}
+	t = tmin;
+	return true;
 }
