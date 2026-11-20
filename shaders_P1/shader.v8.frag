@@ -82,7 +82,6 @@ void main()
 	  vec3 fogColor = vec3(0.4, 0.35, 0.5); 
 	  vec3 color = shade(); // Guardamos los cálculos de la iluminación en una variable
 
-	  //outColor = vec4(vec3(heightFactor), 1.0); //DEPURACIÓN -- DONDE SE CORTA LA NIEBLA
 	  outColor = vec4(mix(fogColor, color, f), 1.0);
 }
 

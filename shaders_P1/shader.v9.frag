@@ -32,8 +32,6 @@ float alpha = 80.0; // Exponente de brillo
 
 // Propiedades de la luz
 vec3 Ia = vec3(0.15, 0.15, 0.2); // Intensidad de luz ambiental
-//vec3 Id = vec3(0.3, 0.1, 0.7); // Intensidad de luz difusa
-//vec3 Is = vec3(1.0, 0.5, 0.8); // Intensidad de luz especular
 
 vec3 lPos = vec3 (0.0, 2.0, 0.0); // Posición de la luz
 
@@ -72,7 +70,7 @@ void main()
 	  float fogThickness = 0.5;
 	  float heightFactor = 1.0 - smoothstep (fogHeight - fogThickness, fogHeight, worldPos.y);
 
-	  vec3 wind = vec3(0.3, 0.0, 0.1) * (time/5000);
+	  vec3 wind = vec3(0.3, 0.0, 0.1) * (time/2000);
 	  float maxDensity = 0.8;
 	  float density = maxDensity * heightFactor * fbm(worldPos * 1.5 + wind);
 
@@ -86,12 +84,8 @@ void main()
 	  vec3 fogColor = vec3(0.06, 0.03, 0.1); 
 	  vec3 color = shade(); // Guardamos los cálculos de la iluminación en una variable
 
-	  //outColor = vec4(vec3(heightFactor), 1.0); //DEPURACIÓN -- DONDE SE CORTA LA NIEBLA
 	  outColor = vec4(mix(fogColor, color, f), 1.0);
 }
-
- //outColor = vec4(vec3(heightFactor), 1.0); //DEPURACIÓN -- DONDE SE CORTA LA NIEBLA
-	 // outColor = vec4(mix(fogColor, color, f), 1.0);
 
 // --------------- Iluminación --------------- 
 // Función auxiliar que calcula con una luz proveniente de la dirección L con intensidad difusa lD e especular lS y cel-shading
